@@ -26,7 +26,10 @@ Pilih aset favorit Anda dalam lingkungan yang teroptimasi. Kami mendukung berbag
       <td align="center"><img src="https://assets.coingecko.com/coins/images/44/standard/xrp-symbol-white-128.png?1696501442" width="50" style="border-radius: 10px;" /><br/><b>XRP</b></td>
       <td align="center"><img src="https://assets.coingecko.com/coins/images/5/standard/dogecoin.png?1696501409" width="50" style="border-radius: 10px;" /><br/><b>Dogecoin</b></td>
     </tr>
-
+    <tr>
+      <td align="center"><img src="https://assets.coingecko.com/coins/images/26580/standard/ONDO.png?1696525656" width="50" style="border-radius: 10px;" /><br/><b>Ondo</b></td>
+      <td colspan="2" align="center"><i>Future assets loading...</i></td>
+    </tr>
   </table>
 </div>
 
@@ -48,7 +51,7 @@ Dapatkan gambaran instan tentang seluruh kekayaan digital Anda dalam satu layar.
 ### 🪙 2. Multi-Coin Ecosystem
 Satu aplikasi untuk semua aset favorit Anda:
 - **Major Assets**: Bitcoin (BTC), Ethereum (ETH).
-- **Hype & Trending**: Hyperliquid (HYPE), Sui (SUI), XRP, Dogecoin (DOGE).
+- [x] **Hype & Trending**: Hyperliquid (HYPE), Sui (SUI), XRP, Dogecoin (DOGE), Ondo Finance (ONDO).
 - **Auto-Price Sync**: Harga koin terupdate secara otomatis melalui integrasi API CoinGecko.
 
 ### 🛡️ 3. Smart Transaction Engine
@@ -96,7 +99,7 @@ Jangan lewatkan berita penting! Kami mengintegrasikan berita kripto terbaru lang
 ```zsh
 > Initializing Neural-Portfolio Core... [DONE]
 > Syncing with Global Liquidity Nodes... [OK]
-> Verifying Asset Integrity (BTC/ETH/HYPE)... [100%]
+> Verifying Asset Integrity (BTC/ETH/ONDO)... [100%]
 > Status: SYSTEM OPTIMAL | READY FOR DCA
 ```
 

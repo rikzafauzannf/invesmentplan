@@ -28,6 +28,11 @@ export const COIN_METADATA: Record<string, { name: string; icon: string; color: 
         name: 'Hyperliquid',
         icon: 'https://assets.coingecko.com/coins/images/50882/standard/hyperliquid.jpg?1729431300',
         color: '#00FFA3',
+    },
+    ondo: {
+        name: 'Ondo Finance',
+        icon: 'https://assets.coingecko.com/coins/images/26580/standard/ONDO.png?1696525656',
+        color: '#000000',
     }
 };
 

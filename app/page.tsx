@@ -199,7 +199,7 @@ export default function Home() {
     }, 0));
 
 
-  const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype'];
+  const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype', 'ondo'];
 
   return (
     <div className="min-h-screen bg-background">
