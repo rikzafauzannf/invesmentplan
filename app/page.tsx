@@ -21,7 +21,9 @@ interface Investment {
   amount: number;
   price: number;
   quantity: number;
+  type?: 'buy' | 'sell';
 }
+
 
 export default function Home() {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -66,7 +68,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleAddInvestment = async (amount: number, coinSymbol: string) => {
+  const handleAddInvestment = async (amount: number, coinSymbol: string, type: 'buy' | 'sell' = 'buy') => {
     try {
       const response = await fetch('/api/prices');
       const data = await response.json();
@@ -80,23 +82,46 @@ export default function Home() {
 
       const quantity = amount / price;
 
+      // Validate balance for withdrawals
+      if (type === 'sell') {
+        const currentBalance = investments
+          .filter(inv => inv.coinSymbol === coinSymbol)
+          .reduce((sum, inv) => {
+            const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+            return sum + (isSell ? -inv.quantity : inv.quantity);
+          }, 0);
+
+        if (quantity > currentBalance) {
+          toast.error(`Saldo tidak mencukupi. Anda hanya memiliki ${currentBalance.toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbol.toUpperCase()}.`);
+          return;
+        }
+      }
+
       await createInvestment({
         date: new Date().toISOString(),
         coinSymbol,
         amount,
         price,
         quantity,
+        type,
       });
 
       setSelectedCoin(coinSymbol);
       const updatedData = await fetchInvestments();
       setInvestments(updatedData);
-      toast.success(`Investasi ${coinSymbol.toUpperCase()} berhasil disimpan!`);
+
+      if (type === 'buy') {
+        toast.success(`Investasi ${coinSymbol.toUpperCase()} senilai Rp ${amount.toLocaleString('id-ID')} berhasil disimpan!`);
+      } else {
+        toast.success(`Penarikan ${coinSymbol.toUpperCase()} senilai Rp ${amount.toLocaleString('id-ID')} berhasil dicatat!`);
+      }
     } catch (error) {
       console.error('Error adding investment:', error);
-      toast.error('Error menambahkan investasi. Silakan coba lagi.');
+      toast.error('Error memproses transaksi. Silakan coba lagi.');
     }
   };
+
+
 
   const handleDeleteInvestment = async (id: string) => {
     try {
@@ -125,17 +150,26 @@ export default function Home() {
   const currentPrice = isOverview ? 0 : (prices[selectedCoin] || 0);
 
   // Portfolio Totals
-  const totalInvested = filteredInvestments.reduce((sum, inv) => sum + inv.amount, 0);
+  const totalInvested = filteredInvestments.reduce((sum, inv) => {
+    const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+    return sum + (isSell ? -Math.abs(inv.amount) : inv.amount);
+  }, 0);
 
   // For overview, we need to calculate current value per coin and sum them up
   const portfolioValue = isOverview
     ? Object.keys(prices).reduce((sum, symbol) => {
       const coinQuantity = investments
         .filter(inv => inv.coinSymbol === symbol)
-        .reduce((q, inv) => q + inv.quantity, 0);
-      return sum + (coinQuantity * (prices[symbol] || 0));
+        .reduce((q, inv) => {
+          const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+          return q + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
+        }, 0);
+      return sum + (Math.max(0, coinQuantity) * (prices[symbol] || 0));
     }, 0)
-    : filteredInvestments.reduce((sum, inv) => sum + inv.quantity, 0) * currentPrice;
+    : Math.max(0, filteredInvestments.reduce((sum, inv) => {
+      const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+      return sum + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
+    }, 0)) * currentPrice;
 
   const profitLoss = portfolioValue - totalInvested;
   const profitLossPercent = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
@@ -143,16 +177,24 @@ export default function Home() {
   // Coin distribution for chart
   const portfolioData = isOverview
     ? Array.from(new Set(investments.map(inv => inv.coinSymbol))).map(symbol => {
-      const coinValue = investments
+      const coinQuantity = investments
         .filter(inv => inv.coinSymbol === symbol)
-        .reduce((sum, inv) => sum + inv.quantity, 0) * (prices[symbol] || 0);
+        .reduce((q, inv) => {
+          const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+          return q + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
+        }, 0);
+      const coinValue = Math.max(0, coinQuantity) * (prices[symbol] || 0);
       return { symbol: symbol.toUpperCase(), value: coinValue };
     }).filter(d => d.value > 0)
     : undefined;
 
   const totalQuantity = isOverview
     ? 0
-    : filteredInvestments.reduce((sum, inv) => sum + inv.quantity, 0);
+    : Math.max(0, filteredInvestments.reduce((sum, inv) => {
+      const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+      return sum + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
+    }, 0));
+
 
   const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype'];
 

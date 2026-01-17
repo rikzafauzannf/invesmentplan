@@ -38,10 +38,17 @@ export default function PortfolioSummary({
 
     const coinStats = coinsWithData.map((symbol) => {
         const coinInvestments = investments.filter((inv) => inv.coinSymbol === symbol);
-        const totalInvested = coinInvestments.reduce((sum, inv) => sum + inv.amount, 0);
-        const totalQuantity = coinInvestments.reduce((sum, inv) => sum + inv.quantity, 0);
+        const totalInvested = coinInvestments.reduce((sum, inv) => {
+            const isSell = (inv as any).type === 'sell' || (inv.amount < 0 && (inv as any).type !== 'buy');
+            return sum + (isSell ? -Math.abs(inv.amount) : inv.amount);
+        }, 0);
+        const totalQuantity = coinInvestments.reduce((sum, inv) => {
+            const isSell = (inv as any).type === 'sell' || (inv.amount < 0 && (inv as any).type !== 'buy');
+            return sum + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
+        }, 0);
+
         const currentPrice = prices[symbol] || 0;
-        const currentValue = totalQuantity * currentPrice;
+        const currentValue = Math.max(0, totalQuantity) * currentPrice;
         const profitLoss = currentValue - totalInvested;
         const profitPercent = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
         const avgPrice = totalQuantity > 0 ? totalInvested / totalQuantity : 0;
@@ -49,7 +56,7 @@ export default function PortfolioSummary({
         return {
             symbol,
             totalInvested,
-            totalQuantity,
+            totalQuantity: Math.max(0, totalQuantity),
             avgPrice,
             currentPrice,
             currentValue,
@@ -57,6 +64,7 @@ export default function PortfolioSummary({
             profitPercent,
         };
     }).sort((a, b) => b.currentValue - a.currentValue);
+
 
     if (coinStats.length === 0) return null;
 
@@ -100,7 +108,8 @@ export default function PortfolioSummary({
                                         </div>
                                     </TableCell>
                                     <TableCell>{formatCurrency(stat.totalInvested)}</TableCell>
-                                    <TableCell>{formatCurrency(stat.avgPrice)}</TableCell>
+                                    <TableCell>{stat.totalQuantity > 0 ? formatCurrency(stat.avgPrice) : '-'}</TableCell>
+
                                     <TableCell>
                                         {stat.totalQuantity.toLocaleString('id-ID', {
                                             minimumFractionDigits: 0,

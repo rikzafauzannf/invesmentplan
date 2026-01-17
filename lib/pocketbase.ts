@@ -20,6 +20,7 @@ export async function createInvestment(data: {
   amount: number;
   price: number;
   quantity: number;
+  type?: 'buy' | 'sell';
 }) {
   const response = await fetch('/api/investments', {
     method: 'POST',

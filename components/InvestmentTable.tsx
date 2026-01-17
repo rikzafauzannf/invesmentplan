@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { getCoinIcon } from '@/lib/coin-data';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +26,9 @@ interface Investment {
   amount: number;
   price: number;
   quantity: number;
+  type?: 'buy' | 'sell';
 }
+
 
 interface InvestmentTableProps {
   investments: Investment[];
@@ -64,11 +67,18 @@ export default function InvestmentTable({
 
   const calculateRowStats = (investment: Investment) => {
     const coinPrice = isOverview ? (prices[investment.coinSymbol] || 0) : currentBtcPrice;
-    const currentValue = investment.quantity * coinPrice;
-    const invested = investment.amount;
-    const profit = currentValue - invested;
-    return { currentValue, profit };
+    const isSell = investment.type === 'sell' || (investment.amount < 0 && investment.type !== 'buy');
+
+    // Amount and quantity should be treated as positive for calculation relative to row
+    const absQty = Math.abs(investment.quantity);
+    const absAmount = Math.abs(investment.amount);
+
+    const currentValue = absQty * coinPrice;
+    const profit = currentValue - absAmount;
+
+    return { currentValue, profit, isSell };
   };
+
 
   if (investments.length === 0) {
     return (
@@ -102,9 +112,10 @@ export default function InvestmentTable({
             <TableHeader>
               <TableRow>
                 <TableHead>Tanggal</TableHead>
+                <TableHead>Tipe</TableHead>
                 {isOverview && <TableHead>Koin</TableHead>}
                 <TableHead>Investasi</TableHead>
-                <TableHead>Harga Beli</TableHead>
+                <TableHead>Harga Aset</TableHead>
                 <TableHead>Jumlah Koin</TableHead>
                 <TableHead className="text-right">Nilai Saat Ini</TableHead>
                 <TableHead className="text-right">Profit/Loss</TableHead>
@@ -113,12 +124,20 @@ export default function InvestmentTable({
             </TableHeader>
             <TableBody>
               {investments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((investment) => {
-                const { currentValue, profit } = calculateRowStats(investment);
+                const { currentValue, profit, isSell } = calculateRowStats(investment);
+
                 return (
-                  <TableRow key={investment.id}>
-                    <TableCell className="font-medium">
+                  <TableRow key={investment.id} className={isSell ? 'bg-red-500/5' : ''}>
+                    <TableCell className="font-medium whitespace-nowrap text-xs md:text-sm text-muted-foreground">
                       {formatDate(investment.date)}
                     </TableCell>
+                    <TableCell>
+                      <Badge variant={isSell ? 'destructive' : 'default'} className="text-[10px] py-0 px-1.5 h-5 font-bold">
+                        {isSell ? 'JUAL' : 'BELI'}
+                      </Badge>
+                    </TableCell>
+
+
                     {isOverview && (
                       <TableCell className="font-semibold text-primary">
                         <div className="flex items-center gap-2">
@@ -132,27 +151,35 @@ export default function InvestmentTable({
                         </div>
                       </TableCell>
                     )}
-                    <TableCell>{formatCurrency(investment.amount)}</TableCell>
+                    <TableCell className={isSell ? 'text-red-400 font-medium' : ''}>
+                      {isSell ? '-' : ''}{formatCurrency(Math.abs(investment.amount))}
+                    </TableCell>
                     <TableCell>{formatCurrency(investment.price)}</TableCell>
-                    <TableCell>
-                      {investment.quantity.toLocaleString('id-ID', {
+                    <TableCell className={isSell ? 'text-red-400 font-medium' : ''}>
+                      {isSell ? '-' : ''}{Math.abs(investment.quantity).toLocaleString('id-ID', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 8
                       })}
                     </TableCell>
+
                     <TableCell className="text-right">
-                      {formatCurrency(currentValue)}
+                      {isSell ? '-' : formatCurrency(currentValue)}
                     </TableCell>
-                    <TableCell className={`text-right font-semibold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      <div className="flex items-center justify-end gap-1">
-                        {profit >= 0 ? (
-                          <TrendingUp className="h-4 w-4" />
-                        ) : (
-                          <TrendingDown className="h-4 w-4" />
-                        )}
-                        {formatCurrency(profit)}
-                      </div>
+                    <TableCell className={`text-right font-semibold ${isSell ? 'text-muted-foreground' : (profit >= 0 ? 'text-green-400' : 'text-red-400')}`}>
+                      {isSell ? (
+                        <span className="text-xs">Realized</span>
+                      ) : (
+                        <div className="flex items-center justify-end gap-1">
+                          {profit >= 0 ? (
+                            <TrendingUp className="h-4 w-4" />
+                          ) : (
+                            <TrendingDown className="h-4 w-4" />
+                          )}
+                          {formatCurrency(profit)}
+                        </div>
+                      )}
                     </TableCell>
+
                     {onDelete && (
                       <TableCell className="text-right">
                         <AlertDialog>

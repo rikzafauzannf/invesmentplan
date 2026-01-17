@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, MinusCircle, Wallet } from 'lucide-react';
 import { getCoinIcon } from '@/lib/coin-data';
 import { toast } from 'sonner';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface InvestmentFormProps {
-  onSubmit: (amount: number, coinSymbol: string) => void;
+  onSubmit: (amount: number, coinSymbol: string, type: 'buy' | 'sell') => void;
   loading: boolean;
 }
 
@@ -26,7 +27,9 @@ const SUPPORTED_COINS = [
 export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProps) {
   const [amount, setAmount] = useState('');
   const [coinSymbol, setCoinSymbol] = useState('btc');
+  const [transactionType, setTransactionType] = useState<'buy' | 'sell'>('buy');
   const [submitting, setSubmitting] = useState(false);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,22 +37,21 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
     const val = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
 
     if (val <= 0) {
-      toast.error('Masukkan jumlah investasi yang valid');
+      toast.error('Masukkan jumlah yang valid');
       return;
     }
 
     setSubmitting(true);
     try {
-      await onSubmit(val, coinSymbol);
+      await onSubmit(val, coinSymbol, transactionType);
       setAmount('');
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Gagal menyimpan investasi.');
+      toast.error('Gagal memproses transaksi.');
     } finally {
       setSubmitting(false);
     }
   };
-
 
   const formatDisplay = (value: string) => {
     if (!value) return '';
@@ -61,12 +63,22 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Plus className="h-5 w-5" />
-          Tambah Investasi Bulanan
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            {transactionType === 'buy' ? <Plus className="h-5 w-5 text-green-400" /> : <MinusCircle className="h-5 w-5 text-red-400" />}
+            {transactionType === 'buy' ? 'Tambah Investasi' : 'Withdraw / Jual'}
+          </CardTitle>
+          <Tabs value={transactionType} onValueChange={(v) => setTransactionType(v as 'buy' | 'sell')} className="w-[180px]">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger value="buy">Beli</TabsTrigger>
+              <TabsTrigger value="sell">Jual</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
         <CardDescription>
-          Pilih koin dan masukkan jumlah investasi dalam Rupiah
+          {transactionType === 'buy'
+            ? 'Masukkan jumlah investasi baru Anda'
+            : 'Masukkan jumlah yang Anda tarik/jual (dalam Rupiah)'}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -96,28 +108,38 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="amount">Investasi {coinSymbol.toUpperCase()} (Rupiah)</Label>
-            <Input
-              type="text"
-              id="amount"
-              value={formatDisplay(amount)}
-              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
-              placeholder="Contoh: 1.500.000"
-              disabled={submitting || loading}
-              className="text-lg"
-            />
+            <Label htmlFor="amount">Jumlah {transactionType === 'buy' ? 'Investasi' : 'Penarikan'} (Rupiah)</Label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">Rp</span>
+              <Input
+                type="text"
+                id="amount"
+                value={formatDisplay(amount)}
+                onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
+                placeholder="0"
+                disabled={submitting || loading}
+                className="pl-10 text-lg font-bold"
+              />
+            </div>
           </div>
           <Button
             type="submit"
             disabled={submitting || loading}
-            className="w-full"
+            variant={transactionType === 'buy' ? 'default' : 'destructive'}
+            className="w-full font-bold"
             size="lg"
           >
-            {submitting ? 'Menyimpan...' : `Simpan Investasi ${coinSymbol.toUpperCase()}`}
+            {submitting ? 'Memproses...' : (
+              <span className="flex items-center gap-2">
+                {transactionType === 'buy' ? <Wallet className="h-5 w-5" /> : <MinusCircle className="h-5 w-5" />}
+                {transactionType === 'buy' ? `Simpan Investasi ${coinSymbol.toUpperCase()}` : `Konfirmasi Jual ${coinSymbol.toUpperCase()}`}
+              </span>
+            )}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
 }
+
 

@@ -27,7 +27,9 @@ export async function GET() {
       amount: item.amount !== undefined ? item.amount : item.btcAmount,
       price: item.price !== undefined ? item.price : item.btcPrice,
       quantity: item.quantity !== undefined ? item.quantity : item.btcQuantity,
+      type: item.type || ((item.amount < 0 || item.btcAmount < 0) ? 'sell' : 'buy'),
     }));
+
 
     return NextResponse.json(investments);
   } catch (error) {
@@ -57,9 +59,8 @@ export async function POST(request: NextRequest) {
           amount: body.amount,
           price: body.price,
           quantity: body.quantity,
+          type: body.type || 'buy',
           // Legacy fields for backward compatibility if user hasn't added new ones yet
-          // PocketBase will ignore unknown fields if not defined in schema, 
-          // but we provide both to be safe during transition
           btcAmount: body.coinSymbol === 'btc' ? body.amount : 0,
           btcPrice: body.coinSymbol === 'btc' ? body.price : 0,
           btcQuantity: body.coinSymbol === 'btc' ? body.quantity : 0,
@@ -81,7 +82,9 @@ export async function POST(request: NextRequest) {
       amount: data.amount,
       price: data.price,
       quantity: data.quantity,
+      type: data.type,
     });
+
   } catch (error) {
     console.error('Error creating investment:', error);
     return NextResponse.json(
