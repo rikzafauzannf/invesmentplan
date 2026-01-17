@@ -44,20 +44,29 @@ pnpm add -g pocketbase
    - Type: Text
    - Required: Yes
 
-2. **btcAmount** (Number)
+2. **coinSymbol** (Text)
+   - Type: Text
+   - Required: Yes
+   - Default: `btc`
+
+3. **amount** (Number)
    - Type: Number
    - Required: Yes
    - Min: 0
 
-3. **btcPrice** (Number)
+4. **price** (Number)
    - Type: Number
    - Required: Yes
    - Min: 0
 
-4. **btcQuantity** (Number)
+5. **quantity** (Number)
    - Type: Number
    - Required: Yes
    - Min: 0
+
+> [!NOTE]
+> Fields `btcAmount`, `btcPrice`, dan `btcQuantity` tetap dipertahankan untuk kompatibilitas data lama, tetapi data baru akan disimpan di field generic di atas.
+
 
 ### Set Collection Rules (PENTING!):
 

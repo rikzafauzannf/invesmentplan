@@ -18,14 +18,15 @@ export async function GET() {
     }
 
     const data = await response.json();
-    
+
     // Transform PocketBase response to match our interface
     const investments = data.items.map((item: any) => ({
       id: item.id,
       date: item.date,
-      btcAmount: item.btcAmount,
-      btcPrice: item.btcPrice,
-      btcQuantity: item.btcQuantity,
+      coinSymbol: item.coinSymbol || 'btc',
+      amount: item.amount !== undefined ? item.amount : item.btcAmount,
+      price: item.price !== undefined ? item.price : item.btcPrice,
+      quantity: item.quantity !== undefined ? item.quantity : item.btcQuantity,
     }));
 
     return NextResponse.json(investments);
@@ -42,7 +43,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    
+
     const response = await fetch(
       `${POCKETBASE_URL}/api/collections/${COLLECTION_NAME}/records`,
       {
@@ -52,9 +53,16 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           date: body.date,
-          btcAmount: body.btcAmount,
-          btcPrice: body.btcPrice,
-          btcQuantity: body.btcQuantity,
+          coinSymbol: body.coinSymbol,
+          amount: body.amount,
+          price: body.price,
+          quantity: body.quantity,
+          // Legacy fields for backward compatibility if user hasn't added new ones yet
+          // PocketBase will ignore unknown fields if not defined in schema, 
+          // but we provide both to be safe during transition
+          btcAmount: body.coinSymbol === 'btc' ? body.amount : 0,
+          btcPrice: body.coinSymbol === 'btc' ? body.price : 0,
+          btcQuantity: body.coinSymbol === 'btc' ? body.quantity : 0,
         }),
       }
     );
@@ -65,13 +73,14 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json();
-    
+
     return NextResponse.json({
       id: data.id,
       date: data.date,
-      btcAmount: data.btcAmount,
-      btcPrice: data.btcPrice,
-      btcQuantity: data.btcQuantity,
+      coinSymbol: data.coinSymbol,
+      amount: data.amount,
+      price: data.price,
+      quantity: data.quantity,
     });
   } catch (error) {
     console.error('Error creating investment:', error);
@@ -81,4 +90,5 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
 

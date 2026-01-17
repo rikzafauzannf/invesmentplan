@@ -11,6 +11,7 @@ interface StatsCardsProps {
   profitLossPercent: number;
   btcPrice: number;
   btcQuantity: number;
+  coinSymbol?: string;
 }
 
 export default function StatsCards({
@@ -20,8 +21,11 @@ export default function StatsCards({
   profitLossPercent,
   btcPrice,
   btcQuantity,
+  coinSymbol = 'btc',
 }: StatsCardsProps) {
   const [isUpdating, setIsUpdating] = useState(false);
+  const isOverview = coinSymbol === 'overview';
+  const symbol = isOverview ? 'Portfolio' : coinSymbol.toUpperCase();
 
   // Show updating indicator when price changes
   useEffect(() => {
@@ -41,53 +45,61 @@ export default function StatsCards({
     }).format(value);
   };
 
-  const formatBtc = (value: number) => {
-    return value.toFixed(8);
+  const formatQuantity = (value: number) => {
+    return value.toLocaleString('id-ID', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 8,
+    });
   };
 
   const stats = [
     {
-      title: 'Total Investasi',
+      title: isOverview ? 'Total Portfolio Invested' : 'Total Investasi',
       value: formatCurrency(totalInvested),
       icon: DollarSign,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/10',
     },
     {
-      title: 'Nilai Saat Ini',
+      title: isOverview ? 'Total Portfolio Value' : 'Nilai Saat Ini',
       value: formatCurrency(totalCurrentValue),
       icon: Bitcoin,
       color: 'text-orange-400',
       bgColor: 'bg-orange-500/10',
     },
     {
-      title: 'Profit/Loss',
+      title: 'Overall Profit/Loss',
       value: `${formatCurrency(profitLoss)} (${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toFixed(2)}%)`,
       icon: profitLoss >= 0 ? TrendingUp : TrendingDown,
       color: profitLoss >= 0 ? 'text-green-400' : 'text-red-400',
       bgColor: profitLoss >= 0 ? 'bg-green-500/10' : 'bg-red-500/10',
     },
-    {
-      title: 'Harga BTC Saat Ini',
-      value: formatCurrency(btcPrice),
-      icon: isUpdating ? RefreshCw : Bitcoin,
-      color: 'text-yellow-400',
-      bgColor: 'bg-yellow-500/10',
-      isUpdating,
-    },
-    {
-      title: 'Total BTC',
-      value: `${formatBtc(btcQuantity)} BTC`,
-      icon: Bitcoin,
-      color: 'text-purple-400',
-      bgColor: 'bg-purple-500/10',
-    },
   ];
 
+  if (!isOverview) {
+    stats.push(
+      {
+        title: `Harga ${symbol} Saat Ini`,
+        value: formatCurrency(btcPrice),
+        icon: isUpdating ? RefreshCw : Bitcoin,
+        color: 'text-yellow-400',
+        bgColor: 'bg-yellow-500/10',
+      },
+      {
+        title: `Total ${symbol}`,
+        value: `${formatQuantity(btcQuantity)} ${symbol}`,
+        icon: Bitcoin,
+        color: 'text-purple-400',
+        bgColor: 'bg-purple-500/10',
+      }
+    );
+  }
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className={`grid grid-cols-1 ${isOverview ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
       {stats.map((stat, index) => {
         const Icon = stat.icon;
+        const shouldAnimate = !isOverview && index === 3 && isUpdating;
         return (
           <Card key={index} className="border-border/50">
             <CardContent className="p-6">
@@ -101,8 +113,8 @@ export default function StatsCards({
                   </p>
                 </div>
                 <div className={`p-3 rounded-lg ${stat.bgColor}`}>
-                  <Icon 
-                    className={`h-5 w-5 ${stat.color} ${(stat as any).isUpdating ? 'animate-spin' : ''}`} 
+                  <Icon
+                    className={`h-5 w-5 ${stat.color} ${shouldAnimate ? 'animate-spin' : ''}`}
                   />
                 </div>
               </div>
@@ -113,3 +125,5 @@ export default function StatsCards({
     </div>
   );
 }
+
+

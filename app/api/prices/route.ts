@@ -4,16 +4,36 @@ export const revalidate = 60; // Revalidate every 60 seconds
 
 export async function GET() {
   try {
-    // Fetch BTC price from CoinGecko API
-    const btcResponse = await fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=idr',
+    const coins = [
+      { id: 'bitcoin', symbol: 'btc' },
+      { id: 'ethereum', symbol: 'eth' },
+      { id: 'ripple', symbol: 'xrp' },
+      { id: 'dogecoin', symbol: 'doge' },
+      { id: 'sui', symbol: 'sui' },
+      { id: 'hyperliquid', symbol: 'hype' }
+    ];
+
+    const ids = coins.map(c => c.id).join(',');
+    
+    // Fetch prices from CoinGecko API
+    const response = await fetch(
+      `https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=idr`,
       { cache: 'no-store' }
     );
-    const btcData = await btcResponse.json();
-    const btcPrice = btcData.bitcoin?.idr || 0;
+    
+    if (!response.ok) {
+      throw new Error(`CoinGecko API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    const prices: Record<string, number> = {};
+    coins.forEach(coin => {
+      prices[coin.symbol] = data[coin.id]?.idr || 0;
+    });
 
     return NextResponse.json({
-      btc: btcPrice,
+      prices,
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -24,3 +44,4 @@ export async function GET() {
     );
   }
 }
+

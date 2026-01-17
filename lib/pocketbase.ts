@@ -16,9 +16,10 @@ export async function fetchInvestments() {
 
 export async function createInvestment(data: {
   date: string;
-  btcAmount: number;
-  btcPrice: number;
-  btcQuantity: number;
+  coinSymbol: string;
+  amount: number;
+  price: number;
+  quantity: number;
 }) {
   const response = await fetch('/api/investments', {
     method: 'POST',
@@ -42,4 +43,5 @@ export async function deleteInvestment(id: string) {
   }
   return response.json();
 }
+
 

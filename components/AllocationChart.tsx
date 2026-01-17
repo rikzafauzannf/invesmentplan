@@ -6,26 +6,31 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface AllocationChartProps {
-  totalInvested: number;
-  currentValue: number;
-  profitLoss: number;
+  totalInvested?: number;
+  currentValue?: number;
+  profitLoss?: number;
+  coinSymbol?: string;
+  portfolioData?: { symbol: string; value: number }[];
 }
 
 export default function AllocationChart({
-  totalInvested,
-  currentValue,
-  profitLoss,
+  totalInvested = 0,
+  currentValue = 0,
+  profitLoss = 0,
+  coinSymbol = 'btc',
+  portfolioData,
 }: AllocationChartProps) {
   const [isAnimating, setIsAnimating] = useState(false);
+  const symbol = coinSymbol.toUpperCase();
 
   // Trigger animation when values change
   useEffect(() => {
-    if (currentValue > 0) {
+    if (currentValue > 0 || (portfolioData && portfolioData.length > 0)) {
       setIsAnimating(true);
       const timer = setTimeout(() => setIsAnimating(false), 500);
       return () => clearTimeout(timer);
     }
-  }, [currentValue, profitLoss]);
+  }, [currentValue, profitLoss, portfolioData]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -36,14 +41,20 @@ export default function AllocationChart({
     }).format(value);
   };
 
+  const isPortfolio = !!portfolioData;
   const profitPercent = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
 
-  const chartData = [
-    { name: 'Total Investasi', value: totalInvested },
-    { name: 'Profit/Loss', value: Math.abs(profitLoss) },
-  ].filter(item => item.value > 0);
+  const chartData = isPortfolio
+    ? portfolioData.map(d => ({ name: d.symbol.toUpperCase(), value: d.value }))
+    : [
+      { name: 'Total Investasi', value: totalInvested },
+      { name: 'Profit/Loss', value: Math.abs(profitLoss) },
+    ].filter(item => item.value > 0);
 
-  const COLORS = ['#3b82f6', profitLoss >= 0 ? '#10b981' : '#ef4444'];
+  const COIN_COLORS = ['#fbbf24', '#6366f1', '#3b82f6', '#10b981', '#f43f5e', '#a855f7'];
+  const COLORS = isPortfolio
+    ? COIN_COLORS
+    : ['#3b82f6', profitLoss >= 0 ? '#10b981' : '#ef4444'];
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -59,16 +70,17 @@ export default function AllocationChart({
     return null;
   };
 
-  if (totalInvested === 0) {
+
+  if (totalInvested === 0 && !isPortfolio) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Portfolio Overview</CardTitle>
-          <CardDescription>Visualisasi portofolio investasi Anda</CardDescription>
+          <CardTitle>Overview Portfolio {isPortfolio ? '' : symbol}</CardTitle>
+          <CardDescription>Visualisasi portofolio investasi {isPortfolio ? 'seluruh koin' : symbol} Anda</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-8">
-            Mulai investasi untuk melihat visualisasi portofolio
+            Mulai investasi untuk melihat visualisasi portofolio {isPortfolio ? 'Anda' : symbol}
           </p>
         </CardContent>
       </Card>
@@ -78,9 +90,10 @@ export default function AllocationChart({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Portfolio Overview</CardTitle>
-        <CardDescription>Visualisasi portofolio investasi Anda</CardDescription>
+        <CardTitle>Overview Portfolio {isPortfolio ? '' : symbol}</CardTitle>
+        <CardDescription>Visualisasi portofolio investasi {isPortfolio ? 'seluruh koin' : symbol} Anda</CardDescription>
       </CardHeader>
+
       <CardContent>
         <div className="space-y-6">
           <div className={`h-[300px] transition-opacity duration-500 ${isAnimating ? 'opacity-70' : 'opacity-100'}`}>
@@ -91,8 +104,8 @@ export default function AllocationChart({
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => 
-                    `${name}: ${(percent * 100).toFixed(1)}%`
+                  label={({ name, percent }) =>
+                    `${name}: ${((percent || 0) * 100).toFixed(1)}%`
                   }
                   outerRadius={100}
                   fill="#8884d8"
@@ -107,7 +120,7 @@ export default function AllocationChart({
               </PieChart>
             </ResponsiveContainer>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
             <div>
               <p className="text-sm text-muted-foreground mb-1">Total Investasi</p>
@@ -147,3 +160,4 @@ export default function AllocationChart({
     </Card>
   );
 }
+

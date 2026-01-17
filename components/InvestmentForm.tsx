@@ -8,28 +8,38 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
 interface InvestmentFormProps {
-  onSubmit: (btcAmount: number) => void;
+  onSubmit: (amount: number, coinSymbol: string) => void;
   loading: boolean;
 }
 
+const SUPPORTED_COINS = [
+  { symbol: 'btc', name: 'Bitcoin' },
+  { symbol: 'eth', name: 'Ethereum' },
+  { symbol: 'xrp', name: 'XRP' },
+  { symbol: 'doge', name: 'Dogecoin' },
+  { symbol: 'sui', name: 'SUI' },
+  { symbol: 'hype', name: 'Hyperliquid' },
+];
+
 export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProps) {
-  const [btcAmount, setBtcAmount] = useState('');
+  const [amount, setAmount] = useState('');
+  const [coinSymbol, setCoinSymbol] = useState('btc');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const btc = parseFloat(btcAmount.replace(/\./g, '').replace(',', '.')) || 0;
 
-    if (btc <= 0) {
+    const val = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
+
+    if (val <= 0) {
       alert('Masukkan jumlah investasi yang valid');
       return;
     }
 
     setSubmitting(true);
     try {
-      await onSubmit(btc);
-      setBtcAmount('');
+      await onSubmit(val, coinSymbol);
+      setAmount('');
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
@@ -52,33 +62,52 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
           Tambah Investasi Bulanan
         </CardTitle>
         <CardDescription>
-          Masukkan jumlah investasi BTC untuk bulan ini
+          Pilih koin dan masukkan jumlah investasi dalam Rupiah
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="btcAmount">Investasi BTC (Rupiah)</Label>
+            <Label htmlFor="coinSymbol">Pilih Koin</Label>
+            <div className="grid grid-cols-3 gap-2">
+              {SUPPORTED_COINS.map((coin) => (
+                <Button
+                  key={coin.symbol}
+                  type="button"
+                  variant={coinSymbol === coin.symbol ? 'default' : 'outline'}
+                  onClick={() => setCoinSymbol(coin.symbol)}
+                  className="w-full text-xs"
+                  size="sm"
+                >
+                  {coin.symbol.toUpperCase()}
+                </Button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="amount">Investasi {coinSymbol.toUpperCase()} (Rupiah)</Label>
             <Input
               type="text"
-              id="btcAmount"
-              value={formatDisplay(btcAmount)}
-              onChange={(e) => setBtcAmount(e.target.value.replace(/\D/g, ''))}
+              id="amount"
+              value={formatDisplay(amount)}
+              onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
               placeholder="Contoh: 1.500.000"
               disabled={submitting || loading}
               className="text-lg"
             />
           </div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={submitting || loading}
             className="w-full"
             size="lg"
           >
-            {submitting ? 'Menyimpan...' : 'Simpan Investasi'}
+            {submitting ? 'Menyimpan...' : `Simpan Investasi ${coinSymbol.toUpperCase()}`}
           </Button>
         </form>
       </CardContent>
     </Card>
   );
 }
+

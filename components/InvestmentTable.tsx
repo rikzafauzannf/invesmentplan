@@ -8,20 +8,28 @@ import { TrendingUp, TrendingDown } from 'lucide-react';
 interface Investment {
   id?: string;
   date: string;
-  btcAmount: number;
-  btcPrice: number;
-  btcQuantity: number;
+  coinSymbol: string;
+  amount: number;
+  price: number;
+  quantity: number;
 }
 
 interface InvestmentTableProps {
   investments: Investment[];
   currentBtcPrice: number;
+  coinSymbol?: string;
+  prices?: Record<string, number>;
 }
 
 export default function InvestmentTable({
   investments,
   currentBtcPrice,
+  coinSymbol = 'btc',
+  prices = {},
 }: InvestmentTableProps) {
+  const isOverview = coinSymbol === 'overview';
+  const symbol = isOverview ? 'Portfolio' : coinSymbol.toUpperCase();
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
       style: 'currency',
@@ -39,22 +47,24 @@ export default function InvestmentTable({
     }
   };
 
-  const calculateRowProfit = (investment: Investment) => {
-    const currentValue = investment.btcQuantity * currentBtcPrice;
-    const invested = investment.btcAmount;
-    return currentValue - invested;
+  const calculateRowStats = (investment: Investment) => {
+    const coinPrice = isOverview ? (prices[investment.coinSymbol] || 0) : currentBtcPrice;
+    const currentValue = investment.quantity * coinPrice;
+    const invested = investment.amount;
+    const profit = currentValue - invested;
+    return { currentValue, profit };
   };
 
   if (investments.length === 0) {
     return (
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>History Investasi</CardTitle>
-          <CardDescription>Riwayat investasi DCA Anda</CardDescription>
+          <CardTitle>History Investasi {symbol}</CardTitle>
+          <CardDescription>Riwayat investasi DCA {symbol} Anda</CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-8">
-            Belum ada data investasi. Tambahkan investasi pertama Anda!
+            Belum ada data investasi untuk {symbol}.
           </p>
         </CardContent>
       </Card>
@@ -64,34 +74,48 @@ export default function InvestmentTable({
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle>History Investasi</CardTitle>
-        <CardDescription>Riwayat investasi DCA Anda</CardDescription>
+        <CardTitle>History Investasi {symbol}</CardTitle>
+        <CardDescription>
+          {isOverview
+            ? 'Riwayat seluruh transaksi investasi Anda'
+            : `Riwayat investasi DCA ${symbol} Anda`}
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="rounded-md border border-border">
+        <div className="rounded-md border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead>Tanggal</TableHead>
+                {isOverview && <TableHead>Koin</TableHead>}
                 <TableHead>Investasi</TableHead>
-                <TableHead>Harga BTC</TableHead>
-                <TableHead>Jumlah BTC</TableHead>
+                <TableHead>Harga Beli</TableHead>
+                <TableHead>Jumlah Koin</TableHead>
                 <TableHead className="text-right">Nilai Saat Ini</TableHead>
                 <TableHead className="text-right">Profit/Loss</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {investments.map((investment) => {
-                const profit = calculateRowProfit(investment);
-                const currentValue = investment.btcQuantity * currentBtcPrice;
+              {investments.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((investment) => {
+                const { currentValue, profit } = calculateRowStats(investment);
                 return (
                   <TableRow key={investment.id}>
                     <TableCell className="font-medium">
                       {formatDate(investment.date)}
                     </TableCell>
-                    <TableCell>{formatCurrency(investment.btcAmount)}</TableCell>
-                    <TableCell>{formatCurrency(investment.btcPrice)}</TableCell>
-                    <TableCell>{investment.btcQuantity.toFixed(8)}</TableCell>
+                    {isOverview && (
+                      <TableCell className="font-semibold text-primary">
+                        {investment.coinSymbol.toUpperCase()}
+                      </TableCell>
+                    )}
+                    <TableCell>{formatCurrency(investment.amount)}</TableCell>
+                    <TableCell>{formatCurrency(investment.price)}</TableCell>
+                    <TableCell>
+                      {investment.quantity.toLocaleString('id-ID', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 8
+                      })}
+                    </TableCell>
                     <TableCell className="text-right">
                       {formatCurrency(currentValue)}
                     </TableCell>
@@ -115,3 +139,5 @@ export default function InvestmentTable({
     </Card>
   );
 }
+
+

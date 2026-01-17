@@ -16,14 +16,17 @@ interface ProfitTrendChartProps {
   currentProfitLoss: number;
   currentProfitPercent: number;
   currentValue: number;
+  coinSymbol?: string;
 }
 
 export default function ProfitTrendChart({
   currentProfitLoss,
   currentProfitPercent,
   currentValue,
+  coinSymbol = 'btc',
 }: ProfitTrendChartProps) {
-  const [snapshots, setSnapshots] = useState<ProfitSnapshot[]>([]);
+  const [snapshotsByCoin, setSnapshotsByCoin] = useState<Record<string, ProfitSnapshot[]>>({});
+  const symbol = coinSymbol.toUpperCase();
 
   // Save snapshot every 15 minutes (when price updates)
   useEffect(() => {
@@ -35,17 +38,25 @@ export default function ProfitTrendChart({
         currentValue,
       };
 
-      setSnapshots((prev) => {
-        const updated = [...prev, newSnapshot];
+      setSnapshotsByCoin((prev) => {
+        const coinHistory = prev[coinSymbol] || [];
+        const updated = [...coinHistory, newSnapshot];
+
         // Keep only last 24 hours (96 snapshots if every 15 min)
-        // Or last 7 days if you want longer history
         const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        return updated.filter(
+        const filtered = updated.filter(
           (snap) => new Date(snap.timestamp).getTime() > oneDayAgo
         );
+
+        return {
+          ...prev,
+          [coinSymbol]: filtered,
+        };
       });
     }
-  }, [currentProfitLoss, currentProfitPercent, currentValue]);
+  }, [currentProfitLoss, currentProfitPercent, currentValue, coinSymbol]);
+
+  const snapshots = snapshotsByCoin[coinSymbol] || [];
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('id-ID', {
@@ -74,7 +85,7 @@ export default function ProfitTrendChart({
     if (active && payload && payload.length > 0) {
       const profitValue = payload[0]?.value || 0;
       const percentValue = payload[0]?.payload?.percent || 0;
-      
+
       return (
         <div className="bg-card border border-border rounded-lg p-3 shadow-lg">
           <p className="text-sm text-muted-foreground mb-2">
@@ -97,14 +108,14 @@ export default function ProfitTrendChart({
     return (
       <Card className="mt-6">
         <CardHeader>
-          <CardTitle>Profit/Loss Trend (24 Jam)</CardTitle>
+          <CardTitle>Profit/Loss Trend {symbol} (24 Jam)</CardTitle>
           <CardDescription>
-            Grafik perubahan profit/loss dari waktu ke waktu
+            Grafik perubahan profit/loss {symbol} dari waktu ke waktu
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-8">
-            Data akan muncul setelah harga BTC terupdate (setiap 15 menit)
+            Data akan muncul setelah harga {symbol} terupdate (setiap 15 menit)
           </p>
         </CardContent>
       </Card>
@@ -114,9 +125,9 @@ export default function ProfitTrendChart({
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle>Profit/Loss Trend (24 Jam)</CardTitle>
+        <CardTitle>Profit/Loss Trend {symbol} (24 Jam)</CardTitle>
         <CardDescription>
-          Grafik perubahan profit/loss dari waktu ke waktu
+          Grafik perubahan profit/loss {symbol} dari waktu ke waktu
           <span className="ml-2 text-xs">
             (Update setiap 15 menit - {snapshots.length} data points)
           </span>
@@ -164,9 +175,8 @@ export default function ProfitTrendChart({
             <div>
               <p className="text-sm text-muted-foreground">Profit Saat Ini</p>
               <p
-                className={`text-lg font-bold ${
-                  currentProfitLoss >= 0 ? 'text-green-400' : 'text-red-400'
-                }`}
+                className={`text-lg font-bold ${currentProfitLoss >= 0 ? 'text-green-400' : 'text-red-400'
+                  }`}
               >
                 {formatCurrency(currentProfitLoss)}
               </p>
@@ -174,9 +184,8 @@ export default function ProfitTrendChart({
             <div>
               <p className="text-sm text-muted-foreground">Persentase</p>
               <p
-                className={`text-lg font-bold ${
-                  currentProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'
-                }`}
+                className={`text-lg font-bold ${currentProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'
+                  }`}
               >
                 {currentProfitPercent >= 0 ? '+' : ''}
                 {currentProfitPercent.toFixed(2)}%
@@ -194,4 +203,5 @@ export default function ProfitTrendChart({
     </Card>
   );
 }
+
 
