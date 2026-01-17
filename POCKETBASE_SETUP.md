@@ -40,8 +40,8 @@ pnpm add -g pocketbase
 
 ### Tambahkan Fields:
 
-1. **date** (Text)
-   - Type: Text
+1. **date** (DateTime)
+   - Type: DateTime
    - Required: Yes
 
 2. **coinSymbol** (Text)
@@ -52,7 +52,7 @@ pnpm add -g pocketbase
 3. **amount** (Number)
    - Type: Number
    - Required: Yes
-   - Min: 0
+   - Min: 0 (Penting: Isi tetap positif, logika jual/beli diatur oleh field `type`)
 
 4. **price** (Number)
    - Type: Number
@@ -64,8 +64,18 @@ pnpm add -g pocketbase
    - Required: Yes
    - Min: 0
 
+6. **type** (Text)
+   - Type: Text
+   - Options: `buy`, `sell`
+   - Default: `buy`
+   - Required: Yes
+
+> [!IMPORTANT]
+> **Pencegahan Error:** Pastikan field `amount`, `price`, dan `quantity` **tidak** memiliki batasan angka negatif (set minimum ke 0). Aplikasi sekarang menggunakan field `type` untuk membedakan transaksi beli/jual secara cerdas sehingga tidak menyebabkan error di PocketBase.
+
 > [!NOTE]
-> Fields `btcAmount`, `btcPrice`, dan `btcQuantity` tetap dipertahankan untuk kompatibilitas data lama, tetapi data baru akan disimpan di field generic di atas.
+> Fields `btcAmount`, `btcPrice`, dan `btcQuantity` tetap dipertahankan untuk kompatibilitas data lama jika ada, tetapi data baru akan sepenuhnya menggunakan field generic di atas.
+
 
 
 ### Set Collection Rules (PENTING!):

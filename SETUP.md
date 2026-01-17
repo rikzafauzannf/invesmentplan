@@ -1,51 +1,31 @@
 # Setup Instructions
 
-## 1. Install Dependencies
+> [!IMPORTANT]
+> **Migrasi Backend:** Aplikasi ini telah dimigrasi dari Firebase ke **PocketBase** untuk performa yang lebih baik dan kemudahan penggunaan secara lokal.
+
+## 1. Setup Backend (PocketBase)
+
+Silakan ikuti panduan lengkap pengaturan database di file terpisah:
+👉 **[POCKETBASE_SETUP.md](file:///c:/Users/rikza/Documents/development/invesmentplan/POCKETBASE_SETUP.md)**
+
+## 2. Install Dependencies
+
+Gunakan `pnpm` atau `npm` untuk menginstall dependencies:
 
 ```bash
+pnpm install
+# atau
 npm install
 ```
 
-## 2. Setup Firebase
+## 3. Environment Variables
 
-1. Buka [Firebase Console](https://console.firebase.google.com/)
-2. Buat project baru atau gunakan project yang sudah ada
-3. Di Project Settings, scroll ke bawah dan copy konfigurasi web app
-4. Buat file `.env.local` di root project dengan isi:
+Buat file `.env.local` di root project dengan isi:
 
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key_here
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project_id.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_POCKETBASE_URL=http://127.0.0.1:8090
 ```
 
-## 3. Setup Firestore Database
-
-1. Di Firebase Console, buka **Firestore Database**
-2. Klik **Create Database**
-3. Pilih **Start in test mode** (untuk development)
-4. Pilih lokasi database (pilih yang terdekat dengan Anda)
-5. Klik **Enable**
-
-## 4. Setup Firestore Rules (Opsional untuk Production)
-
-Untuk production, update rules di Firestore:
-
-```
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /investments/{document=**} {
-      allow read, write: if true; // Untuk development
-      // Untuk production, gunakan authentication:
-      // allow read, write: if request.auth != null;
-    }
-  }
-}
-```
 
 ## 5. Run Development Server
 
@@ -72,15 +52,15 @@ Aplikasi menggunakan CoinGecko API (gratis) untuk mendapatkan harga BTC real-tim
 
 ## Troubleshooting
 
-### Error: Firebase not initialized
-- Pastikan file `.env.local` sudah dibuat dengan konfigurasi yang benar
+### Error: PocketBase not initialized
+- Pastikan PocketBase sedang berjalan (`./pocketbase.exe serve`)
+- Pastikan file `.env.local` sudah dibuat dengan URL yang benar
 - Restart development server setelah membuat `.env.local`
 
-### Error: Firestore permission denied
-- Pastikan Firestore Database sudah dibuat
-- Pastikan rules Firestore mengizinkan read/write (untuk development)
+### Error: PocketBase permission denied (403)
+- Pastikan semua **API Rules** di koleksi `investments` sudah dikosongkan (blank) di Admin UI.
 
 ### Harga tidak update
-- Pastikan koneksi internet aktif
-- CoinGecko API memiliki rate limit, tunggu beberapa saat jika error
+- Pastikan koneksi internet aktif.
+- API koin (CoinGecko) memiliki rate limit, tunggu beberapa saat jika error.
 
