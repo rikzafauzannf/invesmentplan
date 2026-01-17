@@ -33,6 +33,11 @@ export const COIN_METADATA: Record<string, { name: string; icon: string; color: 
         name: 'Ondo Finance',
         icon: 'https://assets.coingecko.com/coins/images/26580/standard/ONDO.png?1696525656',
         color: '#000000',
+    },
+    ada: {
+        name: 'Cardano',
+        icon: 'https://coin-images.coingecko.com/coins/images/975/large/cardano.png?1696502090',
+        color: '#0033AD',
     }
 };
 

@@ -28,7 +28,7 @@ export default function ProfitTrendChart({
   const [snapshotsByCoin, setSnapshotsByCoin] = useState<Record<string, ProfitSnapshot[]>>({});
   const symbol = coinSymbol.toUpperCase();
 
-  // Save snapshot every 15 minutes (when price updates)
+  // Save snapshot every 5 minutes (when price updates)
   useEffect(() => {
     if (currentValue > 0) {
       const newSnapshot: ProfitSnapshot = {
@@ -115,7 +115,7 @@ export default function ProfitTrendChart({
         </CardHeader>
         <CardContent>
           <p className="text-center text-muted-foreground py-8">
-            Data akan muncul setelah harga {symbol} terupdate (setiap 15 menit)
+            Data akan muncul setelah harga {symbol} terupdate (setiap 5 menit)
           </p>
         </CardContent>
       </Card>
@@ -129,7 +129,7 @@ export default function ProfitTrendChart({
         <CardDescription>
           Grafik perubahan profit/loss {symbol} dari waktu ke waktu
           <span className="ml-2 text-xs">
-            (Update setiap 15 menit - {snapshots.length} data points)
+            (Update setiap 5 menit - {snapshots.length} data points)
           </span>
         </CardDescription>
       </CardHeader>

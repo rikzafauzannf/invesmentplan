@@ -11,7 +11,8 @@ export async function GET() {
       { id: 'dogecoin', symbol: 'doge' },
       { id: 'sui', symbol: 'sui' },
       { id: 'hyperliquid', symbol: 'hype' },
-      { id: 'ondo-finance', symbol: 'ondo' }
+      { id: 'ondo-finance', symbol: 'ondo' },
+      { id: 'cardano', symbol: 'ada' }
     ];
 
     const ids = coins.map(c => c.id).join(',');

@@ -46,7 +46,7 @@ export default function Home() {
     };
 
     fetchPrices();
-    const interval = setInterval(fetchPrices, 15 * 60 * 1000);
+    const interval = setInterval(fetchPrices, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
 
@@ -199,7 +199,7 @@ export default function Home() {
     }, 0));
 
 
-  const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype', 'ondo'];
+  const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype', 'ondo', 'ada'];
 
   return (
     <div className="min-h-screen bg-background">
@@ -214,7 +214,7 @@ export default function Home() {
                 <h1 className="text-4xl font-bold text-foreground">Crypto DCA Tracker</h1>
                 <p className="text-muted-foreground">
                   Track your Dollar Cost Averaging investment
-                  <span className="ml-2 text-xs">(Harga update setiap 15 menit)</span>
+                  <span className="ml-2 text-xs">(Harga update setiap 5 menit)</span>
                 </p>
               </div>
             </div>

@@ -23,6 +23,7 @@ const SUPPORTED_COINS = [
   { symbol: 'sui', name: 'SUI' },
   { symbol: 'hype', name: 'Hyperliquid' },
   { symbol: 'ondo', name: 'Ondo Finance' },
+  { symbol: 'ada', name: 'Cardano' },
 ];
 
 export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProps) {
