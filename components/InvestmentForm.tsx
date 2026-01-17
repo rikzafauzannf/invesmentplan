@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { getCoinIcon } from '@/lib/coin-data';
+import { toast } from 'sonner';
 
 interface InvestmentFormProps {
   onSubmit: (amount: number, coinSymbol: string) => void;
@@ -33,7 +34,7 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
     const val = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
 
     if (val <= 0) {
-      alert('Masukkan jumlah investasi yang valid');
+      toast.error('Masukkan jumlah investasi yang valid');
       return;
     }
 
@@ -43,10 +44,12 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
       setAmount('');
     } catch (error) {
       console.error('Error submitting form:', error);
+      toast.error('Gagal menyimpan investasi.');
     } finally {
       setSubmitting(false);
     }
   };
+
 
   const formatDisplay = (value: string) => {
     if (!value) return '';

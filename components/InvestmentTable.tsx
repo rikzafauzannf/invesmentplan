@@ -3,8 +3,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { TrendingUp, TrendingDown } from 'lucide-react';
+import { TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { getCoinIcon } from '@/lib/coin-data';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface Investment {
   id?: string;
@@ -20,6 +32,7 @@ interface InvestmentTableProps {
   currentBtcPrice: number;
   coinSymbol?: string;
   prices?: Record<string, number>;
+  onDelete?: (id: string) => void;
 }
 
 export default function InvestmentTable({
@@ -27,6 +40,7 @@ export default function InvestmentTable({
   currentBtcPrice,
   coinSymbol = 'btc',
   prices = {},
+  onDelete,
 }: InvestmentTableProps) {
   const isOverview = coinSymbol === 'overview';
   const symbol = isOverview ? 'Portfolio' : coinSymbol.toUpperCase();
@@ -94,6 +108,7 @@ export default function InvestmentTable({
                 <TableHead>Jumlah Koin</TableHead>
                 <TableHead className="text-right">Nilai Saat Ini</TableHead>
                 <TableHead className="text-right">Profit/Loss</TableHead>
+                {onDelete && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,7 +153,41 @@ export default function InvestmentTable({
                         {formatCurrency(profit)}
                       </div>
                     </TableCell>
+                    {onDelete && (
+                      <TableCell className="text-right">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tindakan ini tidak dapat dibatalkan. Transaksi ini akan dihapus secara permanen dari riwayat investasi Anda.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => onDelete(investment.id || '')}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Hapus
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </TableCell>
+                    )}
+
                   </TableRow>
+
                 );
               })}
             </TableBody>

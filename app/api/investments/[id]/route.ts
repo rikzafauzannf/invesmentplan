@@ -6,11 +6,12 @@ const COLLECTION_NAME = 'investments';
 // DELETE - Delete investment
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
-    
+    const { id } = await params;
+
+
     const response = await fetch(
       `${POCKETBASE_URL}/api/collections/${COLLECTION_NAME}/records/${id}`,
       {

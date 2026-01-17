@@ -25,6 +25,8 @@ interface CryptoNewsProps {
     coinSymbol: string;
 }
 
+import { Skeleton } from '@/components/ui/skeleton';
+
 export default function CryptoNews({ coinSymbol }: CryptoNewsProps) {
     const [news, setNews] = useState<NewsItem[]>([]);
     const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -52,12 +54,13 @@ export default function CryptoNews({ coinSymbol }: CryptoNewsProps) {
 
     if (loading) {
         return (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6 animate-pulse">
-                <div className="lg:col-span-1 h-[400px] bg-muted/50 rounded-xl" />
-                <div className="lg:col-span-2 h-[400px] bg-muted/50 rounded-xl" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                <Skeleton className="lg:col-span-1 h-[400px] rounded-xl" />
+                <Skeleton className="lg:col-span-2 h-[400px] rounded-xl" />
             </div>
         );
     }
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">

@@ -11,6 +11,8 @@ import PortfolioSummary from '@/components/PortfolioSummary';
 import CryptoNews from '@/components/CryptoNews';
 import { getCoinIcon } from '@/lib/coin-data';
 import { TrendingUp, LayoutDashboard } from 'lucide-react';
+import { toast } from 'sonner';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Investment {
   id?: string;
@@ -72,7 +74,7 @@ export default function Home() {
 
       const price = currentPrices[coinSymbol];
       if (!price) {
-        alert('Harga koin tidak ditemukan. Silakan coba lagi nanti.');
+        toast.error('Harga koin tidak ditemukan. Silakan coba lagi nanti.');
         return;
       }
 
@@ -89,13 +91,31 @@ export default function Home() {
       setSelectedCoin(coinSymbol);
       const updatedData = await fetchInvestments();
       setInvestments(updatedData);
+      toast.success(`Investasi ${coinSymbol.toUpperCase()} berhasil disimpan!`);
     } catch (error) {
       console.error('Error adding investment:', error);
-      alert('Error menambahkan investasi. Silakan coba lagi.');
+      toast.error('Error menambahkan investasi. Silakan coba lagi.');
     }
   };
 
+  const handleDeleteInvestment = async (id: string) => {
+    try {
+      const response = await fetch(`/api/investments/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) throw new Error('Gagal menghapus');
+
+      setInvestments(prev => prev.filter(inv => inv.id !== id));
+      toast.success('Transaksi berhasil dihapus.');
+    } catch (error) {
+      console.error('Error deleting investment:', error);
+      toast.error('Gagal menghapus investasi.');
+    }
+  };
+
+
   const isOverview = selectedCoin === 'overview';
+
 
   // Filter and Calculate totals for selected coin
   const filteredInvestments = isOverview
@@ -139,50 +159,50 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-              <TrendingUp className="h-6 w-6 text-primary" />
+        <Tabs value={selectedCoin} onValueChange={setSelectedCoin} className="mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-4xl font-bold text-foreground">Crypto DCA Tracker</h1>
+                <p className="text-muted-foreground">
+                  Track your Dollar Cost Averaging investment
+                  <span className="ml-2 text-xs">(Harga update setiap 15 menit)</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-4xl font-bold text-foreground">Crypto DCA Tracker</h1>
-              <p className="text-muted-foreground">
-                Track your Dollar Cost Averaging investment
-                <span className="ml-2 text-xs">(Harga update setiap 15 menit)</span>
-              </p>
-            </div>
-          </div>
 
-          <div className="flex flex-wrap gap-2">
-            {supportedCoins.map(coin => (
-              <button
-                key={coin}
-                onClick={() => setSelectedCoin(coin)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${selectedCoin === coin
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                  }`}
-              >
-                {coin === 'overview' ? (
-                  <>
-                    <LayoutDashboard className="h-4 w-4" />
-                    OVERVIEW
-                  </>
-                ) : (
-                  <>
-                    <img
-                      src={getCoinIcon(coin)}
-                      alt={coin}
-                      className="w-4 h-4 rounded-full"
-                      onError={(e) => (e.currentTarget.style.display = 'none')}
-                    />
-                    {coin.toUpperCase()}
-                  </>
-                )}
-              </button>
-            ))}
+            <TabsList className="h-auto p-1 flex-wrap gap-1 bg-muted/50 border border-border">
+              {supportedCoins.map(coin => (
+                <TabsTrigger
+                  key={coin}
+                  value={coin}
+                  className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 transition-all hover:bg-muted"
+                >
+                  {coin === 'overview' ? (
+                    <>
+                      <LayoutDashboard className="h-4 w-4" />
+                      OVERVIEW
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        src={getCoinIcon(coin)}
+                        alt={coin}
+                        className="w-4 h-4 rounded-full"
+                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                      />
+                      {coin.toUpperCase()}
+                    </>
+                  )}
+                </TabsTrigger>
+              ))}
+            </TabsList>
           </div>
-        </div>
+        </Tabs>
+
 
         <StatsCards
           totalInvested={totalInvested}
@@ -220,6 +240,7 @@ export default function Home() {
               currentBtcPrice={currentPrice}
               coinSymbol={selectedCoin}
               prices={prices}
+              onDelete={handleDeleteInvestment}
             />
           </>
         ) : (
@@ -228,8 +249,10 @@ export default function Home() {
             currentBtcPrice={currentPrice}
             coinSymbol={selectedCoin}
             prices={prices}
+            onDelete={handleDeleteInvestment}
           />
         )}
+
 
         <ProfitTrendChart
           currentProfitLoss={profitLoss}
