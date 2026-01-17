@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { getCoinIcon } from '@/lib/coin-data';
 
 interface InvestmentFormProps {
   onSubmit: (amount: number, coinSymbol: string) => void;
@@ -76,9 +77,15 @@ export default function InvestmentForm({ onSubmit, loading }: InvestmentFormProp
                   type="button"
                   variant={coinSymbol === coin.symbol ? 'default' : 'outline'}
                   onClick={() => setCoinSymbol(coin.symbol)}
-                  className="w-full text-xs"
+                  className="w-full text-xs flex items-center justify-center gap-2"
                   size="sm"
                 >
+                  <img
+                    src={getCoinIcon(coin.symbol)}
+                    alt={coin.symbol}
+                    className="w-4 h-4 rounded-full"
+                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                  />
                   {coin.symbol.toUpperCase()}
                 </Button>
               ))}

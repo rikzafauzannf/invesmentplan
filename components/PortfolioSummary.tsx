@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { getCoinIcon } from '@/lib/coin-data';
 
 interface Investment {
     id?: string;
@@ -88,7 +89,15 @@ export default function PortfolioSummary({
                                     onClick={() => onSelectCoin(stat.symbol)}
                                 >
                                     <TableCell className="font-bold text-primary">
-                                        {stat.symbol.toUpperCase()}
+                                        <div className="flex items-center gap-2">
+                                            <img
+                                                src={getCoinIcon(stat.symbol)}
+                                                alt={stat.symbol}
+                                                className="w-6 h-6 rounded-full"
+                                                onError={(e) => (e.currentTarget.style.display = 'none')}
+                                            />
+                                            {stat.symbol.toUpperCase()}
+                                        </div>
                                     </TableCell>
                                     <TableCell>{formatCurrency(stat.totalInvested)}</TableCell>
                                     <TableCell>{formatCurrency(stat.avgPrice)}</TableCell>

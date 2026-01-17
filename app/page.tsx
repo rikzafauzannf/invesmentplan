@@ -9,7 +9,8 @@ import AllocationChart from '@/components/AllocationChart';
 import ProfitTrendChart from '@/components/ProfitTrendChart';
 import PortfolioSummary from '@/components/PortfolioSummary';
 import CryptoNews from '@/components/CryptoNews';
-import { TrendingUp } from 'lucide-react';
+import { getCoinIcon } from '@/lib/coin-data';
+import { TrendingUp, LayoutDashboard } from 'lucide-react';
 
 interface Investment {
   id?: string;
@@ -157,12 +158,27 @@ export default function Home() {
               <button
                 key={coin}
                 onClick={() => setSelectedCoin(coin)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${selectedCoin === coin
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${selectedCoin === coin
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-muted text-muted-foreground hover:bg-muted/80'
                   }`}
               >
-                {coin === 'overview' ? 'OVERVIEW' : coin.toUpperCase()}
+                {coin === 'overview' ? (
+                  <>
+                    <LayoutDashboard className="h-4 w-4" />
+                    OVERVIEW
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={getCoinIcon(coin)}
+                      alt={coin}
+                      className="w-4 h-4 rounded-full"
+                      onError={(e) => (e.currentTarget.style.display = 'none')}
+                    />
+                    {coin.toUpperCase()}
+                  </>
+                )}
               </button>
             ))}
           </div>

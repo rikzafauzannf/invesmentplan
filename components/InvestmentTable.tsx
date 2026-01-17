@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { format } from 'date-fns';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { getCoinIcon } from '@/lib/coin-data';
 
 interface Investment {
   id?: string;
@@ -105,7 +106,15 @@ export default function InvestmentTable({
                     </TableCell>
                     {isOverview && (
                       <TableCell className="font-semibold text-primary">
-                        {investment.coinSymbol.toUpperCase()}
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={getCoinIcon(investment.coinSymbol)}
+                            alt={investment.coinSymbol}
+                            className="w-5 h-5 rounded-full"
+                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                          />
+                          {investment.coinSymbol.toUpperCase()}
+                        </div>
                       </TableCell>
                     )}
                     <TableCell>{formatCurrency(investment.amount)}</TableCell>
