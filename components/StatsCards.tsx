@@ -54,7 +54,7 @@ export default function StatsCards({
 
   const stats = [
     {
-      title: isOverview ? 'Total Portfolio Invested' : 'Total Investasi',
+      title: isOverview ? 'Total Portfolio (Net)' : 'Investasi Bersih (Net)',
       value: formatCurrency(totalInvested),
       icon: DollarSign,
       color: 'text-blue-400',
@@ -68,12 +68,13 @@ export default function StatsCards({
       bgColor: 'bg-orange-500/10',
     },
     {
-      title: 'Overall Profit/Loss',
+      title: 'Total Profit (Cum.)',
       value: `${formatCurrency(profitLoss)} (${profitLossPercent >= 0 ? '+' : ''}${profitLossPercent.toFixed(2)}%)`,
       icon: profitLoss >= 0 ? TrendingUp : TrendingDown,
       color: profitLoss >= 0 ? 'text-green-400' : 'text-red-400',
       bgColor: profitLoss >= 0 ? 'bg-green-500/10' : 'bg-red-500/10',
     },
+
   ];
 
   if (!isOverview) {

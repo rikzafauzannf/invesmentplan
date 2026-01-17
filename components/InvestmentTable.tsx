@@ -7,6 +7,7 @@ import { TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
 import { getCoinIcon } from '@/lib/coin-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useMemo } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,18 +66,69 @@ export default function InvestmentTable({
     }
   };
 
+  // Calculate running stats (average buy price) to determine realized profit
+  const enrichedStats = useMemo(() => {
+    const sorted = [...investments].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const coinTotals: Record<string, { qty: number; cost: number }> = {};
+    const stats: Record<string, { avgBuyPrice: number; realizedProfit?: number }> = {};
+
+    sorted.forEach((inv) => {
+      const symbol = inv.coinSymbol.toLowerCase();
+      if (!coinTotals[symbol]) coinTotals[symbol] = { qty: 0, cost: 0 };
+
+      const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+      const absQty = Math.abs(inv.quantity);
+      const absAmount = Math.abs(inv.amount);
+
+      if (!isSell) {
+        // Buy transaction
+        coinTotals[symbol].qty += absQty;
+        coinTotals[symbol].cost += absAmount;
+        const avgBuyPrice = coinTotals[symbol].qty > 0 ? coinTotals[symbol].cost / coinTotals[symbol].qty : inv.price;
+        if (inv.id) {
+          stats[inv.id] = { avgBuyPrice };
+        }
+      } else {
+        // Sell transaction
+        const avgBuyPriceBefore = coinTotals[symbol].qty > 0 ? coinTotals[symbol].cost / coinTotals[symbol].qty : inv.price;
+        const realizedProfit = (inv.price - avgBuyPriceBefore) * absQty;
+
+        // Update running totals (FIFO-ish / weighted average reduction)
+        coinTotals[symbol].qty = Math.max(0, coinTotals[symbol].qty - absQty);
+        coinTotals[symbol].cost = Math.max(0, coinTotals[symbol].cost - (avgBuyPriceBefore * absQty));
+
+        if (inv.id) {
+          stats[inv.id] = { avgBuyPrice: avgBuyPriceBefore, realizedProfit };
+        }
+      }
+    });
+
+    return stats;
+  }, [investments]);
+
   const calculateRowStats = (investment: Investment) => {
-    const coinPrice = isOverview ? (prices[investment.coinSymbol] || 0) : currentBtcPrice;
+    const coinPrice = isOverview ? (prices[investment.coinSymbol.toLowerCase()] || 0) : currentBtcPrice;
     const isSell = investment.type === 'sell' || (investment.amount < 0 && investment.type !== 'buy');
 
-    // Amount and quantity should be treated as positive for calculation relative to row
+    const stats = investment.id ? enrichedStats[investment.id] : null;
+
     const absQty = Math.abs(investment.quantity);
     const absAmount = Math.abs(investment.amount);
 
+    if (isSell) {
+      return {
+        currentValue: 0,
+        profit: stats?.realizedProfit || 0,
+        isSell: true,
+        realized: true
+      };
+    }
+
+    // For Buy, profit is Unrealized (Difference from current market price)
     const currentValue = absQty * coinPrice;
     const profit = currentValue - absAmount;
 
-    return { currentValue, profit, isSell };
+    return { currentValue, profit, isSell: false, realized: false };
   };
 
 
@@ -165,11 +217,9 @@ export default function InvestmentTable({
                     <TableCell className="text-right">
                       {isSell ? '-' : formatCurrency(currentValue)}
                     </TableCell>
-                    <TableCell className={`text-right font-semibold ${isSell ? 'text-muted-foreground' : (profit >= 0 ? 'text-green-400' : 'text-red-400')}`}>
-                      {isSell ? (
-                        <span className="text-xs">Realized</span>
-                      ) : (
-                        <div className="flex items-center justify-end gap-1">
+                    <TableCell className={`text-right font-semibold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                      <div className="flex flex-col items-end">
+                        <div className="flex items-center gap-1">
                           {profit >= 0 ? (
                             <TrendingUp className="h-4 w-4" />
                           ) : (
@@ -177,7 +227,8 @@ export default function InvestmentTable({
                           )}
                           {formatCurrency(profit)}
                         </div>
-                      )}
+                        {isSell && <span className="text-[10px] text-muted-foreground font-normal">Realized</span>}
+                      </div>
                     </TableCell>
 
                     {onDelete && (

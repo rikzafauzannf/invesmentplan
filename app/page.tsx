@@ -82,16 +82,19 @@ export default function Home() {
 
       const quantity = amount / price;
 
-      // Validate balance for withdrawals
+      // Validate balance for withdrawals (Sell)
       if (type === 'sell') {
-        const currentBalance = investments
-          .filter(inv => inv.coinSymbol === coinSymbol)
+        const currentBalance = (investments || [])
+          .filter(inv => inv.coinSymbol.toLowerCase() === coinSymbol.toLowerCase())
           .reduce((sum, inv) => {
-            const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
-            return sum + (isSell ? -inv.quantity : inv.quantity);
+            const isSell = inv.type === 'sell' || (Number(inv.amount) < 0 && inv.type !== 'buy');
+            const absQty = Math.abs(Number(inv.quantity || 0));
+            return sum + (isSell ? -absQty : absQty);
           }, 0);
 
-        if (quantity > currentBalance) {
+        // Debug: console.log(`Attempting to sell ${quantity} ${coinSymbol}. Available: ${currentBalance}`);
+
+        if (quantity > currentBalance + 0.00000001) { // Add tiny epsilon for floating point
           toast.error(`Saldo tidak mencukupi. Anda hanya memiliki ${currentBalance.toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbol.toUpperCase()}.`);
           return;
         }
@@ -145,9 +148,9 @@ export default function Home() {
   // Filter and Calculate totals for selected coin
   const filteredInvestments = isOverview
     ? investments
-    : investments.filter(inv => inv.coinSymbol === selectedCoin);
+    : investments.filter(inv => inv.coinSymbol.toLowerCase() === selectedCoin.toLowerCase());
 
-  const currentPrice = isOverview ? 0 : (prices[selectedCoin] || 0);
+  const currentPrice = isOverview ? 0 : (prices[selectedCoin.toLowerCase()] || 0);
 
   // Portfolio Totals
   const totalInvested = filteredInvestments.reduce((sum, inv) => {
@@ -158,8 +161,8 @@ export default function Home() {
   // For overview, we need to calculate current value per coin and sum them up
   const portfolioValue = isOverview
     ? Object.keys(prices).reduce((sum, symbol) => {
-      const coinQuantity = investments
-        .filter(inv => inv.coinSymbol === symbol)
+      const coinQuantity = (investments || [])
+        .filter(inv => inv.coinSymbol.toLowerCase() === symbol.toLowerCase())
         .reduce((q, inv) => {
           const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
           return q + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
@@ -176,9 +179,9 @@ export default function Home() {
 
   // Coin distribution for chart
   const portfolioData = isOverview
-    ? Array.from(new Set(investments.map(inv => inv.coinSymbol))).map(symbol => {
-      const coinQuantity = investments
-        .filter(inv => inv.coinSymbol === symbol)
+    ? Array.from(new Set(investments.map(inv => inv.coinSymbol.toLowerCase()))).map(symbol => {
+      const coinQuantity = (investments || [])
+        .filter(inv => inv.coinSymbol.toLowerCase() === symbol.toLowerCase())
         .reduce((q, inv) => {
           const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
           return q + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
