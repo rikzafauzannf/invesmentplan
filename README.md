@@ -4,7 +4,7 @@
   <img src="public/assets/readme/showcase.png" width="100%" alt="Futuristic Crypto Showcase" />
 </p>
 
-[![Next.js](https://img.shields.io/badge/Next.js-14-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16.1.1-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![PocketBase](https://img.shields.io/badge/PocketBase-0.22-blue?style=for-the-badge&logo=pocketbase)](https://pocketbase.io/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![ShadcnUI](https://img.shields.io/badge/UI-Shadcn-white?style=for-the-badge&logo=shadcnui)](https://ui.shadcn.com/)
@@ -47,22 +47,24 @@ Pilih aset favorit Anda dalam lingkungan yang teroptimasi. Kami mendukung berbag
 Dapatkan gambaran instan tentang seluruh kekayaan digital Anda dalam satu layar.
 - **Unified Portfolio Overview**: Gabungan seluruh koin dalam satu grafik alokasi.
 - **Real-time Stats**: Pantau *Net Invested*, *Current Value*, dan *Profit/Loss* secara *real-time*.
-- **Dynamic Charting**: Grafik tren profit yang elegan menggunakan Recharts.
+- **Area Profit Charts**: Visualisasi profit/loss pribadi yang elegan dengan ApexCharts, lengkap dengan gradien warna dinamis (Hijau/Merah).
 
-### 🪙 2. Multi-Coin Ecosystem
+### 📈 2. Market Intelligence & Professional Charts
+Bukan hanya data pribadi, pantau juga pergerakan pasar layaknya profesional:
+- **TradingView Integration**: Embed chart real-time TradingView untuk setiap koin yang dipilih.
+- **Dynamic Intervals**: Pilih durasi chart mulai dari 5m, 15m, hingga 1h untuk analisa yang lebih dalam.
+- **Live News Feed**: Berita kripto terbaru yang relevan dengan koin yang sedang Anda pantau.
+
+### 🪙 3. Multi-Coin Ecosystem
 Satu aplikasi untuk semua aset favorit Anda:
 - **Major Assets**: Bitcoin (BTC), Ethereum (ETH).
 - [x] **Hype & Trending**: Hyperliquid (HYPE), Sui (SUI), XRP, Dogecoin (DOGE), Ondo Finance (ONDO), Cardano (ADA).
 - **Auto-Price Sync**: Harga koin terupdate secara otomatis melalui integrasi API CoinGecko.
 
-### 🛡️ 3. Smart Transaction Engine
-Sistem pencatatan transaksi yang cerdas dan aman:
+### 🛡️ 4. Smart Transaction Engine & Persistence
 - **Buy/Sell Logic**: Mendukung pencatatan pembelian (DCA) maupun penarikan (*Withdraw/Sell*).
-- **Anti-Overdraft Guard**: Sistem validasi saldo yang mencegah Anda menjual koin melebihi stok yang ada.
-- **Data Integrity**: Menyimpan rekam jejak yang rapi di database modern (PocketBase).
-
-### 📰 4. Market Intelligence
-Jangan lewatkan berita penting! Kami mengintegrasikan berita kripto terbaru langsung ke dashboard Anda untuk membantu pengambilan keputusan yang lebih baik.
+- **LocalStorage Persistence**: Data chart tersimpan di browser Anda, tidak hilang saat refresh.
+- **Auto-Pruning Logic**: Sistem otomatis membersihkan data lama setiap 24 jam untuk menjaga performa dan limit penyimpanan browser.
 
 ---
 
@@ -71,9 +73,9 @@ Jangan lewatkan berita penting! Kami mengintegrasikan berita kripto terbaru lang
 | Keunggulan | Deskripsi |
 | :--- | :--- |
 | **Estetika Premium** | Antarmuka *Dark Mode* dengan efek *glassmorphism* dan komponen Shadcn UI. |
-| **Self-Hosted Privacy** | Data Anda tersimpan di database PocketBase milik sendiri, memberikan privasi penuh. |
-| **User Experience** | Navigasi koin menggunakan sistem *Tabs* yang intuitif dan cepat. |
-| **Mobile Responsive** | Tampilan yang tetap cantik dan fungsional di perangkat mobile. |
+| **Data Integrity** | Sistem validasi saldo yang mencegah kesalahan pencatatan transaksi. |
+| **User Experience** | Grafik yang interaktif, tooltip detail, dan layout yang teroptimasi untuk layar desktop. |
+| **Privacy First** | Data sensitif transaksi tersimpan aman di database PocketBase pribadi Anda. |
 
 ---
 
@@ -87,10 +89,11 @@ Jangan lewatkan berita penting! Kami mengintegrasikan berita kripto terbaru lang
 
 ## 🛠️ Stack Teknologi
 
-- **Framework**: [Next.js 14 (App Router)](https://nextjs.org/)
+- **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
 - **Database**: [PocketBase](https://pocketbase.io/)
 - **Styling**: Tailwind CSS & Shadcn UI
-- **Charts**: Recharts
+- **Charts**: ApexCharts & Recharts
+- **Market Data**: TradingView Advanced Widget
 - **Icons**: Lucide React
 - **Notifications**: Sonner (Toast)
 
