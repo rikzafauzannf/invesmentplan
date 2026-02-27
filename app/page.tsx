@@ -9,6 +9,7 @@ import AllocationChart from '@/components/AllocationChart';
 import ProfitTrendChart from '@/components/ProfitTrendChart';
 import PortfolioSummary from '@/components/PortfolioSummary';
 import CryptoNews from '@/components/CryptoNews';
+import CoinPriceChart from '@/components/CoinPriceChart';
 import { getCoinIcon } from '@/lib/coin-data';
 import { TrendingUp, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
@@ -298,6 +299,10 @@ export default function Home() {
           />
         )}
 
+
+        {!isOverview && (
+          <CoinPriceChart coinSymbol={selectedCoin} />
+        )}
 
         <ProfitTrendChart
           currentProfitLoss={profitLoss}
