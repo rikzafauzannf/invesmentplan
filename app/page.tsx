@@ -199,6 +199,107 @@ export default function Home() {
       return sum + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
     }, 0));
 
+  // --- Background Profit Tracking Logic ---
+  useEffect(() => {
+    if (Object.keys(prices).length === 0 || investments.length === 0) return;
+
+    // 1. Identify all coins with balance > 0
+    const coinsToTrack = Array.from(new Set(investments.map(inv => inv.coinSymbol.toLowerCase())));
+    const now = new Date().toISOString();
+    const snapshotsToSave: Record<string, any> = {};
+
+    let hasUpdate = false;
+
+    coinsToTrack.forEach(symbol => {
+      const coinQuantity = (investments || [])
+        .filter(inv => inv.coinSymbol.toLowerCase() === symbol.toLowerCase())
+        .reduce((q, inv) => {
+          const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+          return q + (isSell ? -Math.abs(inv.quantity) : inv.quantity);
+        }, 0);
+
+      if (coinQuantity > 0) {
+        const coinPrice = prices[symbol] || 0;
+        const coinInvested = (investments || [])
+          .filter(inv => inv.coinSymbol.toLowerCase() === symbol.toLowerCase())
+          .reduce((sum, inv) => {
+            const isSell = inv.type === 'sell' || (inv.amount < 0 && inv.type !== 'buy');
+            return sum + (isSell ? -Math.abs(inv.amount) : inv.amount);
+          }, 0);
+
+        const currentValue = coinQuantity * coinPrice;
+        const profitLoss = currentValue - coinInvested;
+        const profitPercent = coinInvested > 0 ? (profitLoss / coinInvested) * 100 : 0;
+
+        snapshotsToSave[symbol] = {
+          timestamp: now,
+          profitLoss,
+          profitPercent,
+          currentValue
+        };
+        hasUpdate = true;
+      }
+    });
+
+    if (!hasUpdate) return;
+
+    // 2. Load existing snapshots, update, and save
+    const saved = localStorage.getItem('profit_snapshots');
+    let currentData: Record<string, any[]> = {};
+    if (saved) {
+      try {
+        currentData = JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing profit snapshots:', e);
+      }
+    }
+
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    let modified = false;
+
+    Object.keys(snapshotsToSave).forEach(symbol => {
+      const history = currentData[symbol] || [];
+      const newSnap = snapshotsToSave[symbol];
+
+      // Throttling: Only add if price/profit changed or some time passed
+      const lastSnap = history[history.length - 1];
+      if (lastSnap) {
+        const lastTime = new Date(lastSnap.timestamp).getTime();
+        const timeDiff = Date.now() - lastTime;
+        // Don't record if less than 60s passed AND profit is identical
+        if (timeDiff < 60000 && Math.abs(lastSnap.profitLoss - newSnap.profitLoss) < 0.1) {
+          return;
+        }
+      }
+
+      const updated = [...history, newSnap].filter(
+        snap => new Date(snap.timestamp).getTime() > oneDayAgo
+      );
+
+      currentData[symbol] = updated;
+      modified = true;
+    });
+
+    if (modified) {
+      try {
+        localStorage.setItem('profit_snapshots', JSON.stringify(currentData));
+        // Dispatcing custom event to notify ProfitTrendChart component
+        window.dispatchEvent(new Event('profit_snapshots_updated'));
+      } catch (e) {
+        // Simple pruning if quota exceeded
+        if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+          Object.keys(currentData).forEach(s => {
+            if (currentData[s].length > 20) {
+              currentData[s] = currentData[s].slice(Math.floor(currentData[s].length / 2));
+            }
+          });
+          localStorage.setItem('profit_snapshots', JSON.stringify(currentData));
+        }
+      }
+    }
+  }, [prices, investments]);
+  // ----------------------------------------
+
 
   const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype', 'ondo', 'ada'];
 

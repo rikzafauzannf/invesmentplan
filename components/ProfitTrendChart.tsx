@@ -33,8 +33,8 @@ export default function ProfitTrendChart({
   const [interval, setIntervalMinutes] = useState<number>(15); // Default to 15 minutes
   const symbol = coinSymbol.toUpperCase();
 
-  // 1. Load from localStorage on initial mount
-  useEffect(() => {
+  // 1. Load snapshots from localStorage
+  const loadSnapshots = () => {
     const saved = localStorage.getItem('profit_snapshots');
     if (saved) {
       try {
@@ -43,92 +43,25 @@ export default function ProfitTrendChart({
         console.error('Error loading profit snapshots:', e);
       }
     }
+  };
+
+  useEffect(() => {
+    loadSnapshots();
 
     const savedInterval = localStorage.getItem('profit_chart_interval');
     if (savedInterval) {
       setIntervalMinutes(Number(savedInterval));
     }
+
+    // Listen for global updates from page.tsx background service
+    window.addEventListener('profit_snapshots_updated', loadSnapshots);
+    return () => window.removeEventListener('profit_snapshots_updated', loadSnapshots);
   }, []);
 
   // Save interval preference
   useEffect(() => {
     localStorage.setItem('profit_chart_interval', interval.toString());
   }, [interval]);
-
-  // 2. Save snapshot every 5 minutes (when price updates)
-  useEffect(() => {
-    if (currentValue > 0) {
-      const newSnapshot: ProfitSnapshot = {
-        timestamp: new Date().toISOString(),
-        profitLoss: currentProfitLoss,
-        profitPercent: currentProfitPercent,
-        currentValue,
-      };
-
-      setSnapshotsByCoin((prev) => {
-        const coinHistory = prev[coinSymbol] || [];
-
-        // Avoid duplicate timestamps if updates happen faster than 1 minute
-        const lastSnapshot = coinHistory[coinHistory.length - 1];
-        if (lastSnapshot &&
-          new Date(lastSnapshot.timestamp).getTime() > Date.now() - 60000 &&
-          Math.abs(lastSnapshot.profitLoss - currentProfitLoss) < 1) {
-          return prev;
-        }
-
-        const updated = [...coinHistory, newSnapshot];
-
-        // Keep only last 24 hours
-        const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
-        const filtered = updated.filter(
-          (snap) => new Date(snap.timestamp).getTime() > oneDayAgo
-        );
-
-        return {
-          ...prev,
-          [coinSymbol]: filtered,
-        };
-      });
-    }
-  }, [currentProfitLoss, currentProfitPercent, currentValue, coinSymbol]);
-
-  // 3. Persist state to localStorage whenever it changes
-  useEffect(() => {
-    if (Object.keys(snapshotsByCoin).length === 0) return;
-
-    const saveData = (data: Record<string, ProfitSnapshot[]>) => {
-      try {
-        localStorage.setItem('profit_snapshots', JSON.stringify(data));
-      } catch (e) {
-        if (e instanceof DOMException && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED')) {
-          console.warn('LocalStorage Quota Exceeded. Pruning snapshots...');
-
-          // Pruning logic: Remove the oldest 50% of data for each coin
-          const prunedData: Record<string, ProfitSnapshot[]> = {};
-          Object.keys(data).forEach(coin => {
-            const history = data[coin];
-            if (history.length > 10) {
-              prunedData[coin] = history.slice(Math.floor(history.length / 2));
-            } else {
-              prunedData[coin] = history;
-            }
-          });
-
-          // Try saving again with pruned data
-          try {
-            localStorage.setItem('profit_snapshots', JSON.stringify(prunedData));
-            setSnapshotsByCoin(prunedData);
-          } catch (secondError) {
-            console.error('Still failing after pruning. Clearing snapshots.');
-            localStorage.removeItem('profit_snapshots');
-            setSnapshotsByCoin({});
-          }
-        }
-      }
-    };
-
-    saveData(snapshotsByCoin);
-  }, [snapshotsByCoin]);
 
   const snapshots = snapshotsByCoin[coinSymbol] || [];
 
