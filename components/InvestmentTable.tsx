@@ -8,6 +8,7 @@ import { getCoinIcon } from '@/lib/coin-data';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -149,28 +150,35 @@ export default function InvestmentTable({
   }
 
   return (
-    <Card className="mt-6">
-      <CardHeader>
-        <CardTitle>History Investasi {symbol}</CardTitle>
-        <CardDescription>
-          {isOverview
-            ? 'Riwayat seluruh transaksi investasi Anda'
-            : `Riwayat investasi DCA ${symbol} Anda`}
-        </CardDescription>
+    <Card className="border-none glass overflow-hidden">
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-xl font-black tracking-tight uppercase">TRANSACTION LOGS</CardTitle>
+            <CardDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
+              {isOverview ? 'Global portfolio activity history' : `DCA transaction history for ${symbol}`}
+            </CardDescription>
+          </div>
+          <div className="px-3 py-1 bg-muted/50 rounded-full border border-border/50">
+            <span className="text-[10px] font-black uppercase tracking-tighter text-muted-foreground">
+              {investments.length} RECORDS
+            </span>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent>
-        <div className="rounded-md border border-border overflow-x-auto">
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Tanggal</TableHead>
-                <TableHead>Tipe</TableHead>
-                {isOverview && <TableHead>Koin</TableHead>}
-                <TableHead>Investasi</TableHead>
-                <TableHead>Harga Aset</TableHead>
-                <TableHead>Jumlah Koin</TableHead>
-                <TableHead className="text-right">Nilai Saat Ini</TableHead>
-                <TableHead className="text-right">Profit/Loss</TableHead>
+            <TableHeader className="bg-muted/30">
+              <TableRow className="border-border/50 hover:bg-transparent">
+                <TableHead className="text-[10px] font-black uppercase tracking-widest h-10">Timestamp</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest h-10">Action</TableHead>
+                {isOverview && <TableHead className="text-[10px] font-black uppercase tracking-widest h-10">Asset</TableHead>}
+                <TableHead className="text-[10px] font-black uppercase tracking-widest h-10">Volume (IDR)</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest h-10">Unit Price</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest h-10">Quantity</TableHead>
+                <TableHead className="text-right text-[10px] font-black uppercase tracking-widest h-10">Market Value</TableHead>
+                <TableHead className="text-right text-[10px] font-black uppercase tracking-widest h-10">P/L Impact</TableHead>
                 {onDelete && <TableHead className="w-[50px]"></TableHead>}
               </TableRow>
             </TableHeader>
@@ -179,19 +187,24 @@ export default function InvestmentTable({
                 const { currentValue, profit, isSell } = calculateRowStats(investment);
 
                 return (
-                  <TableRow key={investment.id} className={isSell ? 'bg-red-500/5' : ''}>
-                    <TableCell className="font-medium whitespace-nowrap text-xs md:text-sm text-muted-foreground">
+                  <TableRow key={investment.id} className={cn(
+                    "border-border/50 transition-colors",
+                    isSell ? "bg-red-500/5 hover:bg-red-500/10" : "hover:bg-muted/30"
+                  )}>
+                    <TableCell className="font-bold whitespace-nowrap text-[11px] text-muted-foreground uppercase">
                       {formatDate(investment.date)}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={isSell ? 'destructive' : 'default'} className="text-[10px] py-0 px-1.5 h-5 font-bold">
-                        {isSell ? 'JUAL' : 'BELI'}
+                      <Badge variant={isSell ? 'destructive' : 'default'} className={cn(
+                        "text-[9px] py-0 px-2 h-5 font-black tracking-tighter rounded-sm",
+                        !isSell && "bg-green-600 hover:bg-green-700"
+                      )}>
+                        {isSell ? 'SELL' : 'BUY'}
                       </Badge>
                     </TableCell>
 
-
                     {isOverview && (
-                      <TableCell className="font-semibold text-primary">
+                      <TableCell className="font-black text-xs">
                         <div className="flex items-center gap-2">
                           <img
                             src={getCoinIcon(investment.coinSymbol)}
@@ -199,35 +212,44 @@ export default function InvestmentTable({
                             className="w-5 h-5 rounded-full"
                             onError={(e) => (e.currentTarget.style.display = 'none')}
                           />
-                          {investment.coinSymbol.toUpperCase()}
+                          <span className="tracking-tighter">{investment.coinSymbol.toUpperCase()}</span>
                         </div>
                       </TableCell>
                     )}
-                    <TableCell className={isSell ? 'text-red-400 font-medium' : ''}>
+                    <TableCell className={cn(
+                      "text-xs font-bold",
+                      isSell ? "text-red-400" : "text-foreground"
+                    )}>
                       {isSell ? '-' : ''}{formatCurrency(Math.abs(investment.amount))}
                     </TableCell>
-                    <TableCell>{formatCurrency(investment.price)}</TableCell>
-                    <TableCell className={isSell ? 'text-red-400 font-medium' : ''}>
+                    <TableCell className="text-xs text-muted-foreground">{formatCurrency(investment.price)}</TableCell>
+                    <TableCell className={cn(
+                      "text-xs font-bold font-mono",
+                      isSell ? "text-red-400" : "text-foreground"
+                    )}>
                       {isSell ? '-' : ''}{Math.abs(investment.quantity).toLocaleString('id-ID', {
                         minimumFractionDigits: 0,
                         maximumFractionDigits: 8
                       })}
                     </TableCell>
 
-                    <TableCell className="text-right">
-                      {isSell ? '-' : formatCurrency(currentValue)}
+                    <TableCell className="text-right text-xs font-medium">
+                      {isSell ? <span className="text-muted-foreground/30">—</span> : formatCurrency(currentValue)}
                     </TableCell>
-                    <TableCell className={`text-right font-semibold ${profit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <TableCell className={cn(
+                      "text-right font-black text-xs",
+                      profit >= 0 ? "text-green-400" : "text-red-400"
+                    )}>
                       <div className="flex flex-col items-end">
                         <div className="flex items-center gap-1">
                           {profit >= 0 ? (
-                            <TrendingUp className="h-4 w-4" />
+                            <TrendingUp className="h-3 w-3" />
                           ) : (
-                            <TrendingDown className="h-4 w-4" />
+                            <TrendingDown className="h-3 w-3" />
                           )}
                           {formatCurrency(profit)}
                         </div>
-                        {isSell && <span className="text-[10px] text-muted-foreground font-normal">Realized</span>}
+                        {isSell && <span className="text-[8px] text-muted-foreground font-black uppercase tracking-widest opacity-60">Realized</span>}
                       </div>
                     </TableCell>
 
@@ -238,34 +260,32 @@ export default function InvestmentTable({
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-8 w-8 text-muted-foreground hover:text-destructive transition-colors"
+                              className="h-8 w-8 text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all rounded-lg"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
+                          <AlertDialogContent className="glass border-border/50">
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Hapus Transaksi?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Tindakan ini tidak dapat dibatalkan. Transaksi ini akan dihapus secara permanen dari riwayat investasi Anda.
+                              <AlertDialogTitle className="font-black tracking-tight">TERMINATE RECORD?</AlertDialogTitle>
+                              <AlertDialogDescription className="text-xs uppercase tracking-wide font-medium">
+                                This action is irreversible. The transaction data will be permanently wiped from the ledger.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Batal</AlertDialogCancel>
+                              <AlertDialogCancel className="bg-muted/50 border-border/50 text-[10px] font-black uppercase tracking-widest">ABORT</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => onDelete(investment.id || '')}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                className="bg-destructive hover:bg-destructive/90 text-[10px] font-black uppercase tracking-widest"
                               >
-                                Hapus
+                                EXECUTE DELETE
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
                       </TableCell>
                     )}
-
                   </TableRow>
-
                 );
               })}
             </TableBody>

@@ -10,10 +10,11 @@ import ProfitTrendChart from '@/components/ProfitTrendChart';
 import PortfolioSummary from '@/components/PortfolioSummary';
 import CryptoNews from '@/components/CryptoNews';
 import CoinPriceChart from '@/components/CoinPriceChart';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from '@/components/AppSidebar';
+import DecryptedText from '@/components/reactbits/DecryptedText';
 import { getCoinIcon } from '@/lib/coin-data';
-import { TrendingUp, LayoutDashboard } from 'lucide-react';
 import { toast } from 'sonner';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Investment {
   id?: string;
@@ -25,14 +26,13 @@ interface Investment {
   type?: 'buy' | 'sell';
 }
 
-
 export default function Home() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [prices, setPrices] = useState<Record<string, number>>({});
   const [selectedCoin, setSelectedCoin] = useState('overview');
   const [loading, setLoading] = useState(true);
 
-  // Fetch current prices - Update every 15 minutes
+  // Fetch current prices - Update every 5 minutes
   useEffect(() => {
     const fetchPrices = async () => {
       try {
@@ -93,9 +93,7 @@ export default function Home() {
             return sum + (isSell ? -absQty : absQty);
           }, 0);
 
-        // Debug: console.log(`Attempting to sell ${quantity} ${coinSymbol}. Available: ${currentBalance}`);
-
-        if (quantity > currentBalance + 0.00000001) { // Add tiny epsilon for floating point
+        if (quantity > currentBalance + 0.00000001) {
           toast.error(`Saldo tidak mencukupi. Anda hanya memiliki ${currentBalance.toLocaleString('id-ID', { maximumFractionDigits: 8 })} ${coinSymbol.toUpperCase()}.`);
           return;
         }
@@ -125,8 +123,6 @@ export default function Home() {
     }
   };
 
-
-
   const handleDeleteInvestment = async (id: string) => {
     try {
       const response = await fetch(`/api/investments/${id}`, {
@@ -142,9 +138,7 @@ export default function Home() {
     }
   };
 
-
   const isOverview = selectedCoin === 'overview';
-
 
   // Filter and Calculate totals for selected coin
   const filteredInvestments = isOverview
@@ -159,7 +153,6 @@ export default function Home() {
     return sum + (isSell ? -Math.abs(inv.amount) : inv.amount);
   }, 0);
 
-  // For overview, we need to calculate current value per coin and sum them up
   const portfolioValue = isOverview
     ? Object.keys(prices).reduce((sum, symbol) => {
       const coinQuantity = (investments || [])
@@ -178,7 +171,6 @@ export default function Home() {
   const profitLoss = portfolioValue - totalInvested;
   const profitLossPercent = totalInvested > 0 ? (profitLoss / totalInvested) * 100 : 0;
 
-  // Coin distribution for chart
   const portfolioData = isOverview
     ? Array.from(new Set(investments.map(inv => inv.coinSymbol.toLowerCase()))).map(symbol => {
       const coinQuantity = (investments || [])
@@ -203,7 +195,6 @@ export default function Home() {
   useEffect(() => {
     if (Object.keys(prices).length === 0 || investments.length === 0) return;
 
-    // 1. Identify all coins with balance > 0
     const coinsToTrack = Array.from(new Set(investments.map(inv => inv.coinSymbol.toLowerCase())));
     const now = new Date().toISOString();
     const snapshotsToSave: Record<string, any> = {};
@@ -243,7 +234,6 @@ export default function Home() {
 
     if (!hasUpdate) return;
 
-    // 2. Load existing snapshots, update, and save
     const saved = localStorage.getItem('profit_snapshots');
     let currentData: Record<string, any[]> = {};
     if (saved) {
@@ -261,12 +251,10 @@ export default function Home() {
       const history = currentData[symbol] || [];
       const newSnap = snapshotsToSave[symbol];
 
-      // Throttling: Only add if price/profit changed or some time passed
       const lastSnap = history[history.length - 1];
       if (lastSnap) {
         const lastTime = new Date(lastSnap.timestamp).getTime();
         const timeDiff = Date.now() - lastTime;
-        // Don't record if less than 60s passed AND profit is identical
         if (timeDiff < 60000 && Math.abs(lastSnap.profitLoss - newSnap.profitLoss) < 0.1) {
           return;
         }
@@ -283,10 +271,8 @@ export default function Home() {
     if (modified) {
       try {
         localStorage.setItem('profit_snapshots', JSON.stringify(currentData));
-        // Dispatcing custom event to notify ProfitTrendChart component
         window.dispatchEvent(new Event('profit_snapshots_updated'));
       } catch (e) {
-        // Simple pruning if quota exceeded
         if (e instanceof DOMException && e.name === 'QuotaExceededError') {
           Object.keys(currentData).forEach(s => {
             if (currentData[s].length > 20) {
@@ -298,123 +284,119 @@ export default function Home() {
       }
     }
   }, [prices, investments]);
-  // ----------------------------------------
-
 
   const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype', 'ondo', 'ada'];
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <Tabs value={selectedCoin} onValueChange={setSelectedCoin} className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-4xl font-bold text-foreground">Crypto DCA Tracker</h1>
-                <p className="text-muted-foreground">
-                  Track your Dollar Cost Averaging investment
-                  <span className="ml-2 text-xs">(Harga update setiap 5 menit)</span>
-                </p>
-              </div>
+    <SidebarProvider>
+      <div className="flex min-h-screen bg-background w-full">
+        <AppSidebar
+          selectedCoin={selectedCoin}
+          onSelectCoin={setSelectedCoin}
+          supportedCoins={supportedCoins}
+        />
+
+        <SidebarInset className="flex-1 transition-all duration-300">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border/50 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger className="-ml-1" />
+              <div className="h-4 w-[1px] bg-border/50" />
+              <h1 className="text-xl font-black tracking-tighter uppercase text-glow">
+                <DecryptedText
+                  text={selectedCoin === 'overview' ? 'Global Portfolio' : `${selectedCoin} Terminal`}
+                  animateOn="view"
+                  revealDirection="center"
+                  speed={80}
+                />
+              </h1>
             </div>
 
-            <TabsList className="h-auto p-1 flex-wrap gap-1 bg-muted/50 border border-border">
-              {supportedCoins.map(coin => (
-                <TabsTrigger
-                  key={coin}
-                  value={coin}
-                  className="rounded-full px-4 py-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground gap-2 transition-all hover:bg-muted"
-                >
-                  {coin === 'overview' ? (
-                    <>
-                      <LayoutDashboard className="h-4 w-4" />
-                      OVERVIEW
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        src={getCoinIcon(coin)}
-                        alt={coin}
-                        className="w-4 h-4 rounded-full"
-                        onError={(e) => (e.currentTarget.style.display = 'none')}
-                      />
-                      {coin.toUpperCase()}
-                    </>
-                  )}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </div>
-        </Tabs>
+            <div className="flex items-center gap-3 px-3 py-1.5 bg-muted/30 rounded-full border border-border/50 backdrop-blur-sm">
+              <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">System Optimal</span>
+            </div>
+          </header>
 
+          <main className="p-4 md:p-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+              <StatsCards
+                totalInvested={totalInvested}
+                totalCurrentValue={portfolioValue}
+                profitLoss={profitLoss}
+                profitLossPercent={profitLossPercent}
+                btcPrice={currentPrice}
+                btcQuantity={totalQuantity}
+                coinSymbol={selectedCoin}
+              />
 
-        <StatsCards
-          totalInvested={totalInvested}
-          totalCurrentValue={portfolioValue}
-          profitLoss={profitLoss}
-          profitLossPercent={profitLossPercent}
-          btcPrice={currentPrice}
-          btcQuantity={totalQuantity}
-          coinSymbol={selectedCoin}
-        />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div className="glass rounded-xl p-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <InvestmentForm
+                    onSubmit={handleAddInvestment}
+                    loading={loading}
+                    selectedCoin={selectedCoin}
+                    prices={prices}
+                  />
+                </div>
+                <div className="glass rounded-xl p-1 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <AllocationChart
+                    totalInvested={totalInvested}
+                    currentValue={portfolioValue}
+                    profitLoss={profitLoss}
+                    coinSymbol={selectedCoin}
+                    portfolioData={portfolioData}
+                  />
+                </div>
+              </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-          <InvestmentForm onSubmit={handleAddInvestment} loading={loading} />
-          <AllocationChart
-            totalInvested={totalInvested}
-            currentValue={portfolioValue}
-            profitLoss={profitLoss}
-            coinSymbol={selectedCoin}
-            portfolioData={portfolioData}
-          />
-        </div>
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                <CryptoNews coinSymbol={selectedCoin} />
+              </div>
 
-        <CryptoNews coinSymbol={selectedCoin} />
+              <div className="space-y-8">
+                {isOverview ? (
+                  <>
+                    <PortfolioSummary
+                      investments={investments}
+                      prices={prices}
+                      onSelectCoin={setSelectedCoin}
+                    />
+                    <InvestmentTable
+                      investments={filteredInvestments}
+                      currentBtcPrice={currentPrice}
+                      coinSymbol={selectedCoin}
+                      prices={prices}
+                      onDelete={handleDeleteInvestment}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <div className="glass rounded-xl overflow-hidden border border-border/50">
+                      <CoinPriceChart coinSymbol={selectedCoin} />
+                    </div>
+                    <InvestmentTable
+                      investments={filteredInvestments}
+                      currentBtcPrice={currentPrice}
+                      coinSymbol={selectedCoin}
+                      prices={prices}
+                      onDelete={handleDeleteInvestment}
+                    />
+                  </>
+                )}
 
-        {isOverview ? (
-
-          <>
-            <PortfolioSummary
-              investments={investments}
-              prices={prices}
-              onSelectCoin={setSelectedCoin}
-            />
-            <InvestmentTable
-              investments={filteredInvestments}
-              currentBtcPrice={currentPrice}
-              coinSymbol={selectedCoin}
-              prices={prices}
-              onDelete={handleDeleteInvestment}
-            />
-          </>
-        ) : (
-          <InvestmentTable
-            investments={filteredInvestments}
-            currentBtcPrice={currentPrice}
-            coinSymbol={selectedCoin}
-            prices={prices}
-            onDelete={handleDeleteInvestment}
-          />
-        )}
-
-
-        {!isOverview && (
-          <CoinPriceChart coinSymbol={selectedCoin} />
-        )}
-
-        <ProfitTrendChart
-          currentProfitLoss={profitLoss}
-          currentProfitPercent={profitLossPercent}
-          currentValue={portfolioValue}
-          coinSymbol={selectedCoin}
-        />
-
-
+                <div className="glass rounded-xl p-1">
+                  <ProfitTrendChart
+                    currentProfitLoss={profitLoss}
+                    currentProfitPercent={profitLossPercent}
+                    currentValue={portfolioValue}
+                    coinSymbol={selectedCoin}
+                  />
+                </div>
+              </div>
+            </div>
+          </main>
+        </SidebarInset>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
-

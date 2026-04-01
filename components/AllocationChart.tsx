@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface AllocationChartProps {
   totalInvested?: number;
@@ -88,70 +89,103 @@ export default function AllocationChart({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Overview Portfolio {isPortfolio ? '' : symbol}</CardTitle>
-        <CardDescription>Visualisasi portofolio investasi {isPortfolio ? 'seluruh koin' : symbol} Anda</CardDescription>
+    <Card className="border-none glass h-full">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-xl font-black tracking-tight uppercase">
+          {isPortfolio ? 'ASSET ALLOCATION' : `${symbol} PORTFOLIO`}
+        </CardTitle>
+        <CardDescription className="text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
+          {isPortfolio ? 'Distribution of your digital wealth' : `Visual analysis of your ${symbol} position`}
+        </CardDescription>
       </CardHeader>
 
       <CardContent>
-        <div className="space-y-6">
-          <div className={`h-[300px] transition-opacity duration-500 ${isAnimating ? 'opacity-70' : 'opacity-100'}`}>
+        <div className="flex flex-col h-full justify-between gap-6">
+          <div className={cn(
+            "h-[260px] transition-all duration-700",
+            isAnimating ? "scale-95 opacity-50" : "scale-100 opacity-100"
+          )}>
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={chartData}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) =>
-                    `${name}: ${((percent || 0) * 100).toFixed(1)}%`
-                  }
-                  outerRadius={100}
-                  fill="#8884d8"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={5}
                   dataKey="value"
+                  animationBegin={0}
+                  animationDuration={1500}
                 >
                   {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                      stroke="rgba(255,255,255,0.05)"
+                      strokeWidth={2}
+                    />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend />
+                <Legend
+                  verticalAlign="bottom"
+                  height={36}
+                  iconType="circle"
+                  formatter={(value) => <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{value}</span>}
+                />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border">
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Total Investasi</p>
-              <p className="text-2xl font-bold text-blue-400">
-                {formatCurrency(totalInvested)}
-              </p>
+          <div className="space-y-4 pt-4 border-t border-border/30">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-blue-400/60">Total Investasi</p>
+                <p className="text-xl font-black text-blue-400 tracking-tight">
+                  {formatCurrency(totalInvested)}
+                </p>
+              </div>
+              <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-orange-400/60">Nilai Saat Ini</p>
+                <p className="text-xl font-black text-orange-400 tracking-tight">
+                  {formatCurrency(currentValue)}
+                </p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Nilai Saat Ini</p>
-              <p className="text-2xl font-bold text-orange-400">
-                {formatCurrency(currentValue)}
-              </p>
-            </div>
-            <div className="col-span-2">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50">
-                <div className="flex items-center gap-2">
+
+            <div className={cn(
+              "flex items-center justify-between p-4 rounded-xl border transition-all duration-300",
+              profitLoss >= 0
+                ? "bg-green-500/5 border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.05)]"
+                : "bg-red-500/5 border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)]"
+            )}>
+              <div className="flex items-center gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg",
+                  profitLoss >= 0 ? "bg-green-500/20" : "bg-red-500/20"
+                )}>
                   {profitLoss >= 0 ? (
                     <TrendingUp className="h-5 w-5 text-green-400" />
                   ) : (
                     <TrendingDown className="h-5 w-5 text-red-400" />
                   )}
-                  <span className="text-sm text-muted-foreground">Profit/Loss</span>
                 </div>
-                <div className="text-right">
-                  <p className={`text-xl font-bold ${profitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {formatCurrency(profitLoss)}
-                  </p>
-                  <p className={`text-sm ${profitLoss >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                    {profitLoss >= 0 ? '+' : ''}{profitPercent.toFixed(2)}%
-                  </p>
-                </div>
+                <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Growth Performance</span>
+              </div>
+              <div className="text-right">
+                <p className={cn(
+                  "text-xl font-black tracking-tight",
+                  profitLoss >= 0 ? "text-green-400" : "text-red-400"
+                )}>
+                  {formatCurrency(profitLoss)}
+                </p>
+                <p className={cn(
+                  "text-xs font-black",
+                  profitLoss >= 0 ? "text-green-400" : "text-red-400"
+                )}>
+                  {profitLoss >= 0 ? '▲' : '▼'} {Math.abs(profitPercent).toFixed(2)}%
+                </p>
               </div>
             </div>
           </div>

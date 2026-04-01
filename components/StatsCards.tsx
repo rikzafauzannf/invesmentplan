@@ -1,8 +1,10 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Bitcoin, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
+import SpotlightCard from '@/components/reactbits/SpotlightCard';
+import DecryptedText from '@/components/reactbits/DecryptedText';
 
 interface StatsCardsProps {
   totalInvested: number;
@@ -97,34 +99,55 @@ export default function StatsCards({
   }
 
   return (
-    <div className={`grid grid-cols-1 ${isOverview ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-4`}>
+    <div className={`grid grid-cols-1 ${isOverview ? 'md:grid-cols-3' : 'lg:grid-cols-3 md:grid-cols-2'} gap-6`}>
       {stats.map((stat, index) => {
         const Icon = stat.icon;
-        const shouldAnimate = !isOverview && index === 3 && isUpdating;
+        const shouldAnimate = !isOverview && index >= 3 && isUpdating;
         return (
-          <Card key={index} className="border-border/50">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+          <SpotlightCard
+            key={index}
+            className="border-none glass glass-hover relative overflow-hidden group p-0"
+            spotlightColor={stat.color.includes('green') ? 'rgba(34, 197, 94, 0.1)' : stat.color.includes('red') ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)'}
+          >
+            <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-10 rounded-full blur-2xl ${stat.bgColor}`} />
+            <div className="p-6">
+              <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {stat.title}
-                  </p>
-                  <p className={`text-2xl font-bold ${stat.color}`}>
-                    {stat.value}
-                  </p>
+                  <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest h-4">
+                    <DecryptedText
+                      text={stat.title}
+                      animateOn="view"
+                      speed={100}
+                      maxIterations={15}
+                      sequential={true}
+                    />
+                  </div>
+                  <div className="flex items-baseline gap-2">
+                    <p className={cn(
+                      "text-2xl font-black tracking-tight",
+                      stat.color
+                    )}>
+                      {stat.value}
+                    </p>
+                  </div>
                 </div>
-                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                <div className={cn(
+                  "p-3 rounded-2xl transition-all duration-300 group-hover:scale-110",
+                  stat.bgColor
+                )}>
                   <Icon
-                    className={`h-5 w-5 ${stat.color} ${shouldAnimate ? 'animate-spin' : ''}`}
+                    className={cn(
+                      "h-6 w-6",
+                      stat.color,
+                      shouldAnimate && "animate-spin"
+                    )}
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </SpotlightCard>
         );
       })}
     </div>
   );
 }
-
-

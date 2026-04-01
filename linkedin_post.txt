@@ -1,0 +1,23 @@
+I just finished building a personal project — Crypto DCA Tracker.
+
+A web app to track my crypto portfolio using the Dollar Cost Averaging (DCA) strategy. Built it because I couldn't find a clean, private tool that showed exactly what I needed: total invested, current value, and profit/loss — all in one place.
+
+---
+
+Key Features:
+- Real-time portfolio overview (Net Invested, Current Value, P&L)
+- TradingView chart integration per coin
+- Supports 8 assets: BTC, ETH, XRP, DOGE, SUI, HYPE, ONDO, ADA
+- Buy & Sell transaction logging with balance validation
+- Live crypto news feed
+- Profit trend chart with 24-hour history
+
+Tech Stack:
+Next.js 16 · TypeScript · PocketBase · Tailwind CSS · Shadcn UI · ApexCharts · TradingView · Docker
+
+---
+
+GitHub: https://github.com/rikzafauzannf/invesmentplan
+
+#NextJS #TypeScript #WebDevelopment #PersonalProject #OpenSource #React #CryptoTracker
+
