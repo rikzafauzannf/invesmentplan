@@ -55,13 +55,19 @@ Bukan hanya data pribadi, pantau juga pergerakan pasar layaknya profesional:
 - **Dynamic Intervals**: Pilih durasi chart mulai dari 5m, 15m, hingga 1h untuk analisa yang lebih dalam.
 - **Live News Feed**: Berita kripto terbaru yang relevan dengan koin yang sedang Anda pantau.
 
-### 🪙 3. Multi-Coin Ecosystem
+### 🧠 3. AI-Powered Portfolio Intelligence (NEW)
+Analisis mendalam langsung di dashboard Anda:
+- **One-Click AI Analysis**: Analisis menyeluruh portfolio Anda yang digabungkan dengan sentimen pasar terkini.
+- **Sentiment Gauge**: Visualisasi instan kondisi pasar (Bull/Bear) dalam skala -10 hingga +10.
+- **Strategic Recommendations**: Rekomendasi langkah taktis (Hold, Rebalance, Wait-and-see) berbasis data dan sentimen AI dari `9router`.
+
+### 🪙 4. Multi-Coin Ecosystem
 Satu aplikasi untuk semua aset favorit Anda:
 - **Major Assets**: Bitcoin (BTC), Ethereum (ETH).
 - [x] **Hype & Trending**: Hyperliquid (HYPE), Sui (SUI), XRP, Dogecoin (DOGE), Ondo Finance (ONDO), Cardano (ADA).
 - **Auto-Price Sync**: Harga koin terupdate secara otomatis melalui integrasi API CoinGecko.
 
-### 🛡️ 4. Smart Transaction Engine & Persistence
+### 🛡️ 5. Smart Transaction Engine & Persistence
 - **Buy/Sell Logic**: Mendukung pencatatan pembelian (DCA) maupun penarikan (*Withdraw/Sell*).
 - **LocalStorage Persistence**: Data chart tersimpan di browser Anda, tidak hilang saat refresh.
 - **Auto-Pruning Logic**: Sistem otomatis membersihkan data lama setiap 24 jam untuk menjaga performa dan limit penyimpanan browser.
@@ -76,6 +82,7 @@ Satu aplikasi untuk semua aset favorit Anda:
 | **Data Integrity** | Sistem validasi saldo yang mencegah kesalahan pencatatan transaksi. |
 | **User Experience** | Grafik yang interaktif, tooltip detail, dan layout yang teroptimasi untuk layar desktop. |
 | **Privacy First** | Data sensitif transaksi tersimpan aman di database PocketBase pribadi Anda. |
+| **AI Intelligence** | Analisis berbasis konteks berita pasar real-time untuk pengambilan keputusan strategis. |
 
 ---
 
@@ -91,6 +98,7 @@ Satu aplikasi untuk semua aset favorit Anda:
 
 - **Framework**: [Next.js 16 (App Router)](https://nextjs.org/)
 - **Database**: [PocketBase](https://pocketbase.io/)
+- **AI Engine**: [9router](https://github.com/9router) (Local LLM)
 - **Styling**: Tailwind CSS & Shadcn UI
 - **Charts**: ApexCharts & Recharts
 - **Market Data**: TradingView Advanced Widget
@@ -103,41 +111,75 @@ Satu aplikasi untuk semua aset favorit Anda:
 ```zsh
 > Initializing Neural-Portfolio Core... [DONE]
 > Syncing with Global Liquidity Nodes... [OK]
+> Initializing AI Analysis Module (9router)... [OK]
 > Verifying Asset Integrity (BTC/ETH/ADA)... [100%]
 > Status: SYSTEM OPTIMAL | READY FOR DCA
 ```
 
 ---
 
-## 📦 Cara Instalasi
+## 🛠️ Setup & Deployment Guide
 
-1. **Clone Repository**
+### 🚀 1. Persiapan Database (PocketBase)
+Aplikasi ini menggunakan **PocketBase** sebagai *powerhouse* data real-time Anda.
+
+> **Tips:** Pastikan PocketBase berjalan sebelum menjalankan aplikasi agar data sinkronisasi berjalan mulus.
+
+1. **Download & Run**: Unduh binary dari [PocketBase.io](https://pocketbase.io/) dan jalankan:
    ```bash
-   git clone https://github.com/rikzafauzannf/invesmentplan.git
+   ./pocketbase serve
    ```
+2. **Dashboard Konfigurasi**: Akses `http://127.0.0.1:8090/_/`
+3. **Database Schema**: Buat koleksi **`investments`** dengan struktur berikut:
+   - `date`: `Date`
+   - `coinSymbol`: `Text`
+   - `amount`: `Number`
+   - `price`: `Number`
+   - `quantity`: `Number`
+   - `type`: `Text` (Set default: `buy`)
 
-2. **Install Dependencies**
-   ```bash
-   pnpm install
-   ```
+---
 
-3. **Setup PocketBase**
-   - Jalankan `pocketbase.exe serve`.
-   - Buat koleksi `investments` sesuai panduan di aplikasi.
+### 🧠 2. Integrasi AI (9router)
+Ingin dasbor Anda "berpikir"? Hubungkan dengan **9router** lokal Anda.
 
-4. **Environment Variables**
-   Buat file `.env.local`:
+1. **Pastikan Server Aktif**: Jalankan *local LLM engine* Anda di port `20128`.
+2. **Model Availability**: Pastikan model `coding` sudah ter-load (bisa dicek di `http://localhost:20128/v1/models`).
+3. **Environment**: Tambahkan API key Anda ke `.env.local`:
    ```env
-   NEXT_PUBLIC_POCKETBASE_URL=http://127.0.0.1:8090
+   NINE_ROUTER_API_KEY=sk-434ada9936444748-6nkfff-0a8c3e17
    ```
 
-5. **Run Development**
-   ```bash
-   pnpm dev
-   ```
+---
+
+### ⚙️ 3. Konfigurasi Environment
+Buat file `.env.local` di root proyek untuk menghubungkan semua *engine*:
+
+```env
+# Database Hub
+NEXT_PUBLIC_POCKETBASE_URL=http://127.0.0.1:8090
+
+# AI Intelligence Key
+NINE_ROUTER_API_KEY=sk-434ada9936444748-6nkfff-0a8c3e17
+```
+
+---
+
+### 🏃 4. Launch Sequence
+```bash
+# Terminal 1: Database
+./pocketbase serve
+
+# Terminal 2: Intelligence Engine (9router)
+# (Sesuaikan dengan perintah startup engine Anda)
+
+# Terminal 3: Dashboard Next.js
+pnpm dev
+```
+*Sistem sekarang siap digunakan di `http://localhost:3000`.*
 
 ---
 
 <p align="center">
   Dibuat dengan ❤️ untuk masa depan desentralisasi.
-</p>
+</p> 
