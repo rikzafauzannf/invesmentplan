@@ -79,12 +79,18 @@ export default function Sidebar({ selectedCoin, onSelectCoin, supportedCoins }: 
                                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                 )}
                             >
-                                <img
-                                    src={getCoinIcon(coin)}
-                                    alt={coin}
-                                    className="w-5 h-5 rounded-full shrink-0"
-                                    onError={(e) => (e.currentTarget.style.display = 'none')}
-                                />
+                                    {getCoinIcon(coin) ? (
+                                        <img
+                                            src={getCoinIcon(coin) || undefined}
+                                            alt={coin}
+                                            className="w-5 h-5 rounded-full shrink-0"
+                                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                                        />
+                                    ) : (
+                                        <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center text-[8px] font-bold">
+                                            {coin.slice(0, 2).toUpperCase()}
+                                        </div>
+                                    )}
                                 {!isCollapsed && (
                                     <div className="flex items-center justify-between w-full">
                                         <span className="font-medium">{coin.toUpperCase()}</span>

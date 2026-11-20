@@ -206,12 +206,14 @@ export default function InvestmentTable({
                     {isOverview && (
                       <TableCell className="font-black text-xs">
                         <div className="flex items-center gap-2">
-                          <img
-                            src={getCoinIcon(investment.coinSymbol)}
-                            alt={investment.coinSymbol}
-                            className="w-5 h-5 rounded-full"
-                            onError={(e) => (e.currentTarget.style.display = 'none')}
-                          />
+                          {getCoinIcon(investment.coinSymbol) && (
+                            <img
+                              src={getCoinIcon(investment.coinSymbol)!}
+                              alt={investment.coinSymbol}
+                              className="w-5 h-5 rounded-full"
+                              onError={(e) => (e.currentTarget.style.display = 'none')}
+                            />
+                          )}
                           <span className="tracking-tighter">{investment.coinSymbol.toUpperCase()}</span>
                         </div>
                       </TableCell>

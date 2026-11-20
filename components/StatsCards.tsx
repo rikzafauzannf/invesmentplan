@@ -1,8 +1,9 @@
 'use client';
 
-import { TrendingUp, TrendingDown, DollarSign, Bitcoin, RefreshCw } from 'lucide-react';
+import { TrendingUp, TrendingDown, DollarSign, RefreshCw, Circle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { getCoinIcon } from '@/lib/coin-data';
 import SpotlightCard from '@/components/reactbits/SpotlightCard';
 import DecryptedText from '@/components/reactbits/DecryptedText';
 
@@ -61,13 +62,15 @@ export default function StatsCards({
       icon: DollarSign,
       color: 'text-blue-400',
       bgColor: 'bg-blue-500/10',
+      isCustomIcon: false,
     },
     {
       title: isOverview ? 'Total Portfolio Value' : 'Nilai Saat Ini',
       value: formatCurrency(totalCurrentValue),
-      icon: Bitcoin,
+      icon: DollarSign,
       color: 'text-orange-400',
       bgColor: 'bg-orange-500/10',
+      isCustomIcon: false,
     },
     {
       title: 'Total Profit (Cum.)',
@@ -75,8 +78,8 @@ export default function StatsCards({
       icon: profitLoss >= 0 ? TrendingUp : TrendingDown,
       color: profitLoss >= 0 ? 'text-green-400' : 'text-red-400',
       bgColor: profitLoss >= 0 ? 'bg-green-500/10' : 'bg-red-500/10',
+      isCustomIcon: false,
     },
-
   ];
 
   if (!isOverview) {
@@ -84,16 +87,18 @@ export default function StatsCards({
       {
         title: `Harga ${symbol} Saat Ini`,
         value: formatCurrency(btcPrice),
-        icon: isUpdating ? RefreshCw : Bitcoin,
+        icon: isUpdating ? RefreshCw : Circle,
         color: 'text-yellow-400',
         bgColor: 'bg-yellow-500/10',
+        isCustomIcon: true,
       },
       {
         title: `Total ${symbol}`,
         value: `${formatQuantity(btcQuantity)} ${symbol}`,
-        icon: Bitcoin,
+        icon: Circle,
         color: 'text-purple-400',
         bgColor: 'bg-purple-500/10',
+        isCustomIcon: true,
       }
     );
   }
@@ -135,13 +140,28 @@ export default function StatsCards({
                   "p-3 rounded-2xl transition-all duration-300 group-hover:scale-110",
                   stat.bgColor
                 )}>
-                  <Icon
-                    className={cn(
-                      "h-6 w-6",
-                      stat.color,
-                      shouldAnimate && "animate-spin"
-                    )}
-                  />
+                  {stat.isCustomIcon ? (
+                    getCoinIcon(coinSymbol || 'btc') ? (
+                      <img 
+                        src={getCoinIcon(coinSymbol || 'btc') || undefined} 
+                        className={cn("h-6 w-6 rounded-full", shouldAnimate && "animate-spin")} 
+                        alt={coinSymbol}
+                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                      />
+                    ) : (
+                      <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[9px] font-bold">
+                        {(coinSymbol || 'btc').slice(0, 2).toUpperCase()}
+                      </div>
+                    )
+                  ) : (
+                    <Icon
+                      className={cn(
+                        "h-6 w-6",
+                        stat.color,
+                        shouldAnimate && "animate-spin"
+                      )}
+                    />
+                  )}
                 </div>
               </div>
             </div>

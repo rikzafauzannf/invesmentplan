@@ -38,13 +38,36 @@ export const COIN_METADATA: Record<string, { name: string; icon: string; color: 
         name: 'Cardano',
         icon: 'https://coin-images.coingecko.com/coins/images/975/large/cardano.png?1696502090',
         color: '#0033AD',
-    }
+    },
+    sol: {
+        name: 'Solana',
+        icon: 'https://assets.coingecko.com/coins/images/4128/standard/solana.png?1696504756',
+        color: '#14F195',
+    },
+    link: {
+        name: 'Chainlink',
+        icon: 'https://assets.coingecko.com/coins/images/877/standard/chainlink-new-logo.png?1696501625',
+        color: '#2A5ADA',
+    },
+    near: {
+        name: 'NEAR',
+        icon: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/near/info/logo.png',
+        color: '#00C08B',
+    },
+    fet: {
+        name: 'ASI (FET)',
+        icon: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85/logo.png',
+        color: '#1D2D6E',
+    },
+    pepe: {
+        name: 'Pepe',
+        icon: 'https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0x6982508145454Ce325dDbE47a25d4ec3d2311933/logo.png',
+        color: '#558235',
+    },
 };
 
-
-
 export const getCoinIcon = (symbol: string) => {
-    return COIN_METADATA[symbol.toLowerCase()]?.icon || '';
+    return COIN_METADATA[symbol.toLowerCase()]?.icon || null;
 };
 
 export const getCoinName = (symbol: string) => {

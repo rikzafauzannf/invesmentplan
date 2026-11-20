@@ -98,12 +98,14 @@ export default function PortfolioSummary({
                                 >
                                     <TableCell className="font-bold text-primary">
                                         <div className="flex items-center gap-2">
-                                            <img
-                                                src={getCoinIcon(stat.symbol)}
-                                                alt={stat.symbol}
-                                                className="w-6 h-6 rounded-full"
-                                                onError={(e) => (e.currentTarget.style.display = 'none')}
-                                            />
+                                            {getCoinIcon(stat.symbol) && (
+                                                <img
+                                                    src={getCoinIcon(stat.symbol)!}
+                                                    alt={stat.symbol}
+                                                    className="w-6 h-6 rounded-full"
+                                                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                />
+                                            )}
                                             {stat.symbol.toUpperCase()}
                                         </div>
                                     </TableCell>

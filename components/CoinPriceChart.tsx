@@ -16,6 +16,11 @@ const SYMBOL_MAP: Record<string, string> = {
     hype: 'BYBIT:HYPEUSDT',
     ondo: 'BINANCE:ONDOUSDT',
     ada: 'BINANCE:ADAUSDT',
+    sol: 'BINANCE:SOLUSDT',
+    link: 'BINANCE:LINKUSDT',
+    near: 'BINANCE:NEARUSDT',
+    fet: 'BINANCE:FETUSDT',
+    pepe: 'BINANCE:PEPEUSDT',
 };
 
 const CoinPriceChart = ({ coinSymbol }: CoinPriceChartProps) => {
@@ -43,7 +48,18 @@ const CoinPriceChart = ({ coinSymbol }: CoinPriceChartProps) => {
             locale: 'en',
             allow_symbol_change: false,
             calendar: false,
-            support_host: 'https://www.tradingview.com'
+            support_host: 'https://www.tradingview.com',
+            studies: [
+                "STD;RSI",
+                "STD;MACD"
+            ],
+            container_id: "tradingview_chart",
+            hide_side_toolbar: false,
+            withdateranges: true,
+            save_image: false,
+            show_popup_button: true,
+            popup_width: "1000",
+            popup_height: "650"
         });
 
         container.current.appendChild(script);

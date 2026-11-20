@@ -8,8 +8,11 @@ import StatsCards from '@/components/StatsCards';
 import AllocationChart from '@/components/AllocationChart';
 import ProfitTrendChart from '@/components/ProfitTrendChart';
 import PortfolioSummary from '@/components/PortfolioSummary';
+import DCAPlanner from '@/components/DCAPlanner';
+import DCASplitCalculator from '@/components/DCASplitCalculator';
 import CryptoNews from '@/components/CryptoNews';
 import CoinPriceChart from '@/components/CoinPriceChart';
+import CoinTechnicalAnalysis from '@/components/CoinTechnicalAnalysis';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/AppSidebar';
 import DecryptedText from '@/components/reactbits/DecryptedText';
@@ -29,10 +32,12 @@ interface Investment {
 export default function Home() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [prices, setPrices] = useState<Record<string, number>>({});
+  const [changes, setChanges] = useState<Record<string, number>>({});
+  const [sortedCoins, setSortedCoins] = useState<string[]>(['btc', 'eth', 'sol', 'xrp', 'doge', 'sui', 'hype', 'ondo', 'link', 'near', 'fet', 'pepe', 'ada']);
   const [selectedCoin, setSelectedCoin] = useState('overview');
   const [loading, setLoading] = useState(true);
 
-  // Fetch current prices - Update every 5 minutes
+  // Fetch current prices and market rank / changes - Update every 5 minutes
   useEffect(() => {
     const fetchPrices = async () => {
       try {
@@ -40,6 +45,12 @@ export default function Home() {
         const data = await response.json();
         if (data.prices) {
           setPrices(data.prices);
+        }
+        if (data.changes) {
+          setChanges(data.changes);
+        }
+        if (data.sortedSymbols) {
+          setSortedCoins(data.sortedSymbols);
         }
       } catch (error) {
         console.error('Error fetching prices:', error);
@@ -285,7 +296,7 @@ export default function Home() {
     }
   }, [prices, investments]);
 
-  const supportedCoins = ['overview', 'btc', 'eth', 'xrp', 'doge', 'sui', 'hype', 'ondo', 'ada'];
+  const supportedCoins = ['overview', 'btc', 'eth', 'sol', 'sui', 'hype', 'ondo', 'link', 'near', 'fet', 'pepe', 'xrp', 'ada', 'doge'];
 
   return (
     <SidebarProvider>
@@ -294,6 +305,8 @@ export default function Home() {
           selectedCoin={selectedCoin}
           onSelectCoin={setSelectedCoin}
           supportedCoins={supportedCoins}
+          prices={prices}
+          changes={changes}
         />
 
         <SidebarInset className="flex-1 transition-all duration-300">
@@ -361,6 +374,10 @@ export default function Home() {
                       prices={prices}
                       onSelectCoin={setSelectedCoin}
                     />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      <DCAPlanner />
+                      <DCASplitCalculator prices={prices} supportedCoins={supportedCoins} />
+                    </div>
                     <InvestmentTable
                       investments={filteredInvestments}
                       currentBtcPrice={currentPrice}
@@ -371,8 +388,13 @@ export default function Home() {
                   </>
                 ) : (
                   <>
-                    <div className="glass rounded-xl overflow-hidden border border-border/50">
-                      <CoinPriceChart coinSymbol={selectedCoin} />
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                      <div className="lg:col-span-2 glass rounded-xl overflow-hidden border border-border/50">
+                        <CoinPriceChart coinSymbol={selectedCoin} />
+                      </div>
+                      <div className="lg:col-span-1">
+                        <CoinTechnicalAnalysis coinSymbol={selectedCoin} />
+                      </div>
                     </div>
                     <InvestmentTable
                       investments={filteredInvestments}
