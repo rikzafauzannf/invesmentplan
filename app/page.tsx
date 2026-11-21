@@ -346,13 +346,13 @@ export default function Home() {
               />
 
               <Tabs defaultValue="dashboard" className="space-y-6">
-                <TabsList className="bg-muted/30 border border-border/50 p-1 w-full sm:w-auto overflow-x-auto flex flex-nowrap">
-                  <TabsTrigger value="dashboard" className="text-[10px] font-bold tracking-widest px-6">DASHBOARD</TabsTrigger>
-                  <TabsTrigger value="market" className="text-[10px] font-bold tracking-widest px-6">MARKET & NEWS</TabsTrigger>
-                  <TabsTrigger value="tools" className="text-[10px] font-bold tracking-widest px-6">TOOLS LAB</TabsTrigger>
+                <TabsList className="bg-muted/30 border border-border/50 p-1 w-full sm:w-auto overflow-x-auto flex flex-nowrap rounded-xl">
+                  <TabsTrigger value="dashboard" className="text-[10px] font-bold tracking-widest px-6 transition-all duration-300 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">DASHBOARD</TabsTrigger>
+                  <TabsTrigger value="market" className="text-[10px] font-bold tracking-widest px-6 transition-all duration-300 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">MARKET & NEWS</TabsTrigger>
+                  <TabsTrigger value="tools" className="text-[10px] font-bold tracking-widest px-6 transition-all duration-300 data-[state=active]:bg-primary/20 data-[state=active]:text-primary">TOOLS LAB</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="dashboard" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <TabsContent value="dashboard" className="space-y-8 animate-in fade-in-50 slide-in-from-bottom-4 duration-500 ease-in-out">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div className="glass rounded-xl p-1">
                       <InvestmentForm
@@ -420,11 +420,11 @@ export default function Home() {
                   </div>
                 </TabsContent>
 
-                <TabsContent value="market" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <TabsContent value="market" className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 ease-in-out">
                   <CryptoNews coinSymbol={selectedCoin} />
                 </TabsContent>
 
-                <TabsContent value="tools" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <TabsContent value="tools" className="animate-in fade-in-50 slide-in-from-bottom-4 duration-500 ease-in-out">
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <DCAPlanner />
                     <DCASplitCalculator prices={prices} supportedCoins={supportedCoins} />
