@@ -108,47 +108,50 @@ export default function ProfitTrendChart({
   const chartOptions: ApexOptions = {
     chart: {
       type: 'area',
-      height: 450,
+      height: 350,
       toolbar: {
-        show: true,
-        tools: {
-          download: false,
-          selection: true,
-          zoom: true,
-          zoomin: true,
-          zoomout: true,
-          pan: true,
-          reset: true,
-        },
+        show: false, // Cleaner UI by default
       },
       background: 'transparent',
       foreColor: 'hsl(var(--muted-foreground))',
+      animations: {
+        enabled: true,
+        speed: 800,
+        animateGradually: {
+          enabled: true,
+          delay: 150
+        },
+        dynamicAnimation: {
+          enabled: true,
+          speed: 350
+        }
+      }
     },
     dataLabels: {
       enabled: false
     },
     stroke: {
       curve: 'smooth',
-      width: 3,
-      colors: [currentProfitLoss >= 0 ? '#10b981' : '#ef4444'],
+      width: 2.5,
+      colors: [currentProfitLoss >= 0 ? '#10b981' : '#f43f5e'],
     },
     fill: {
       type: 'gradient',
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: 0.45,
-        opacityTo: 0.05,
-        stops: [20, 100, 100],
+        opacityFrom: 0.25,
+        opacityTo: 0.02,
+        stops: [0, 90, 100],
         colorStops: [
           {
             offset: 0,
-            color: currentProfitLoss >= 0 ? '#10b981' : '#ef4444',
-            opacity: 0.4
+            color: currentProfitLoss >= 0 ? '#10b981' : '#f43f5e',
+            opacity: 0.25
           },
           {
             offset: 100,
-            color: currentProfitLoss >= 0 ? '#10b981' : '#ef4444',
-            opacity: 0.05
+            color: currentProfitLoss >= 0 ? '#10b981' : '#f43f5e',
+            opacity: 0.02
           }
         ]
       }
@@ -156,18 +159,15 @@ export default function ProfitTrendChart({
     markers: {
       size: 0,
       hover: {
-        size: 5
+        size: 4
       }
-    },
-    title: {
-      text: undefined,
     },
     xaxis: {
       type: 'datetime',
       labels: {
         datetimeUTC: false,
         style: {
-          fontSize: '12px',
+          fontSize: '10px',
         },
       },
       axisBorder: {
@@ -178,9 +178,6 @@ export default function ProfitTrendChart({
       }
     },
     yaxis: {
-      tooltip: {
-        enabled: true,
-      },
       labels: {
         formatter: (value) => {
           if (Math.abs(value) >= 1000000) {
@@ -192,14 +189,14 @@ export default function ProfitTrendChart({
           return Math.floor(value).toString();
         },
         style: {
-          fontSize: '12px',
+          fontSize: '10px',
         },
       },
     },
-    colors: [currentProfitLoss >= 0 ? '#10b981' : '#ef4444'],
+    colors: [currentProfitLoss >= 0 ? '#10b981' : '#f43f5e'],
     grid: {
       borderColor: 'hsl(var(--border))',
-      strokeDashArray: 4,
+      strokeDashArray: 5,
       xaxis: {
         lines: {
           show: true
@@ -217,11 +214,12 @@ export default function ProfitTrendChart({
       custom: function ({ series, seriesIndex, dataPointIndex, w }) {
         const val = series[seriesIndex][dataPointIndex];
         const date = format(new Date(w.globals.seriesX[seriesIndex][dataPointIndex]), 'HH:mm');
+        const color = val >= 0 ? '#10b981' : '#f43f5e';
 
         return `
-          <div style="padding: 12px; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 8px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);">
-            <div style="font-size: 11px; color: hsl(var(--muted-foreground)); margin-bottom: 4px; font-weight: 500;">${date}</div>
-            <div style="font-size: 14px; font-weight: 700; color: ${val >= 0 ? '#10b981' : '#ef4444'};">
+          <div style="padding: 10px; background: hsl(var(--card)); border: 1px solid hsl(var(--border)); border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);">
+            <div style="font-size: 9px; color: hsl(var(--muted-foreground)); margin-bottom: 2px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">${date}</div>
+            <div style="font-size: 12px; font-weight: 800; color: ${color};">
                 ${formatCurrency(val, 2)}
             </div>
           </div>
@@ -239,16 +237,16 @@ export default function ProfitTrendChart({
 
   if (snapshots.length === 0) {
     return (
-      <Card className="mt-6">
-        <CardHeader>
-          <CardTitle>Profit/Loss Trend {symbol} (24 Jam)</CardTitle>
-          <CardDescription>
-            Grafik perubahan profit/loss {symbol} dari waktu ke waktu
+      <Card className="border-none glass">
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl font-black tracking-tight uppercase">PROFIT/LOSS TREND (24H)</CardTitle>
+          <CardDescription className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-muted-foreground/60">
+            Real-time tracking for {symbol} performance over time
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-center text-muted-foreground py-8">
-            Data akan muncul setelah harga {symbol} terupdate (setiap 5 menit)
+          <p className="text-center text-xs font-medium text-muted-foreground py-10 uppercase tracking-widest">
+            Awaiting price snapshot updates (Every 5 mins)
           </p>
         </CardContent>
       </Card>
@@ -256,65 +254,67 @@ export default function ProfitTrendChart({
   }
 
   return (
-    <Card className="mt-6">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0">
+    <Card className="border-none glass">
+      <CardHeader className="pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <CardTitle>Profit/Loss Trend {symbol} (24 Jam)</CardTitle>
-          <CardDescription>
-            Grafik perubahan profit/loss {symbol} ({interval >= 60 ? `${interval / 60}h` : `${interval}m`} interval)
-            <span className="ml-2 text-xs">
-              (Update setiap 5 menit - {snapshots.length} data points)
-            </span>
+          <CardTitle className="text-lg sm:text-xl font-black tracking-tight uppercase">
+            PROFIT/LOSS TREND ({symbol})
+          </CardTitle>
+          <CardDescription className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-muted-foreground/60 mt-0.5">
+            24H Movement ({interval >= 60 ? `${interval / 60}h` : `${interval}m`} intervals • {snapshots.length} Data Points)
           </CardDescription>
         </div>
-        <div className="flex bg-muted rounded-lg p-1">
+        <div className="flex bg-muted/40 border border-border/50 rounded-lg p-1 self-start sm:self-auto">
           {[5, 15, 60].map((m) => (
             <button
               key={m}
               onClick={() => setIntervalMinutes(m)}
-              className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${interval === m
-                ? 'bg-primary text-primary-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-                }`}
+              className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${
+                interval === m
+                  ? 'bg-primary/20 text-primary border border-primary/30 shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
-              {m >= 60 ? `${m / 60}h` : `${m}m`}
+              {m >= 60 ? `${m / 60}H` : `${m}M`}
             </button>
           ))}
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="h-[450px]">
+      <CardContent className="space-y-4">
+        <div className="h-[300px] sm:h-[350px] w-full">
           <ReactApexChart
             options={chartOptions}
             series={series}
             type="area"
-            height={450}
+            height="100%"
           />
         </div>
-        <div className="mt-4 p-4 rounded-lg bg-muted/50">
-          <div className="grid grid-cols-3 gap-4 text-center">
+        <div className="p-3 sm:p-4 rounded-xl bg-muted/20 border border-border/40">
+          <div className="grid grid-cols-3 gap-2 text-center">
             <div>
-              <p className="text-sm text-muted-foreground">Profit Saat Ini</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Current P/L</p>
               <p
-                className={`text-lg font-bold ${currentProfitLoss >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}
+                className={`text-sm sm:text-base font-black tracking-tight mt-0.5 ${
+                  currentProfitLoss >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}
               >
                 {formatCurrency(currentProfitLoss)}
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Persentase</p>
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Percentage</p>
               <p
-                className={`text-lg font-bold ${currentProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'
-                  }`}
+                className={`text-sm sm:text-base font-black tracking-tight mt-0.5 ${
+                  currentProfitPercent >= 0 ? 'text-green-400' : 'text-red-400'
+                }`}
               >
                 {currentProfitPercent >= 0 ? '+' : ''}
                 {currentProfitPercent.toFixed(2)}%
               </p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Data Points</p>
-              <p className="text-lg font-bold text-foreground">
+              <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Snapshots</p>
+              <p className="text-sm sm:text-base font-black tracking-tight text-foreground mt-0.5 font-mono">
                 {snapshots.length}
               </p>
             </div>
@@ -323,6 +323,7 @@ export default function ProfitTrendChart({
       </CardContent>
     </Card>
   );
+
 }
 
 

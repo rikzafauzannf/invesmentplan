@@ -48,14 +48,14 @@ export default function AllocationChart({
   const chartData = isPortfolio
     ? portfolioData.map(d => ({ name: d.symbol.toUpperCase(), value: d.value }))
     : [
-      { name: 'Total Investasi', value: totalInvested },
-      { name: 'Profit/Loss', value: Math.abs(profitLoss) },
+      { name: 'Total Invested', value: totalInvested },
+      { name: 'P/L Impact', value: Math.abs(profitLoss) },
     ].filter(item => item.value > 0);
 
   const COIN_COLORS = ['#fbbf24', '#6366f1', '#3b82f6', '#10b981', '#f43f5e', '#a855f7'];
   const COLORS = isPortfolio
     ? COIN_COLORS
-    : ['#3b82f6', profitLoss >= 0 ? '#10b981' : '#ef4444'];
+    : ['#3b82f6', profitLoss >= 0 ? '#10b981' : '#f43f5e'];
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -141,13 +141,13 @@ export default function AllocationChart({
           <div className="space-y-4 pt-4 border-t border-border/30">
             <div className="grid grid-cols-2 gap-4">
               <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-blue-400/60">Total Investasi</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-blue-400/60">Total Invested</p>
                 <p className="text-xl font-black text-blue-400 tracking-tight">
                   {formatCurrency(totalInvested)}
                 </p>
               </div>
               <div className="p-3 rounded-xl bg-orange-500/5 border border-orange-500/10">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-orange-400/60">Nilai Saat Ini</p>
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 text-orange-400/60">Current Value</p>
                 <p className="text-xl font-black text-orange-400 tracking-tight">
                   {formatCurrency(currentValue)}
                 </p>

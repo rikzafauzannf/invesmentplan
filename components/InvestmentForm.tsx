@@ -40,6 +40,19 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
   const [transactionType, setTransactionType] = useState<'buy' | 'sell'>('buy');
   const [submitting, setSubmitting] = useState(false);
 
+  const QUICK_AMOUNTS = [
+    { label: '50K', value: 50000 },
+    { label: '100K', value: 100000 },
+    { label: '500K', value: 500000 },
+    { label: '1M', value: 1000000 },
+    { label: '2.5M', value: 2500000 },
+    { label: '5M', value: 5000000 },
+  ];
+
+  const handleQuickAmount = (val: number) => {
+    setAmount(val.toString());
+  };
+
   // Sync with global selection
   useEffect(() => {
     if (selectedCoin && selectedCoin !== 'overview') {
@@ -141,8 +154,21 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
                 value={formatDisplay(amount)}
                 onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
                 placeholder="0"
-                className="h-11 sm:h-12 text-base sm:text-lg font-black bg-background/50 border-border/50"
+                className="h-11 sm:h-12 text-base sm:text-lg font-black bg-background/50 border-border/50 tabular-nums"
               />
+            </div>
+            {/* Quick Amount Presets */}
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {QUICK_AMOUNTS.map((q) => (
+                <button
+                  key={q.label}
+                  type="button"
+                  onClick={() => handleQuickAmount(q.value)}
+                  className="px-2.5 py-1 rounded-md text-[9px] font-black tracking-widest bg-muted/40 border border-border/50 hover:bg-primary/20 hover:border-primary/30 hover:text-primary transition-all uppercase"
+                >
+                  +{q.label}
+                </button>
+              ))}
             </div>
             {/* Price Preview / Estimated Quantity */}
             {amount && parseFloat(amount) > 0 && prices[coinSymbol] > 0 && (
