@@ -104,7 +104,7 @@ export default function StatsCards({
   }
 
   return (
-    <div className={`grid grid-cols-1 ${isOverview ? 'md:grid-cols-3' : 'lg:grid-cols-3 md:grid-cols-2'} gap-6`}>
+    <div className={`grid grid-cols-1 ${isOverview ? 'md:grid-cols-3' : 'lg:grid-cols-3 md:grid-cols-2'} gap-3 sm:gap-6`}>
       {stats.map((stat, index) => {
         const Icon = stat.icon;
         const shouldAnimate = !isOverview && index >= 3 && isUpdating;
@@ -115,10 +115,10 @@ export default function StatsCards({
             spotlightColor={stat.color.includes('green') ? 'rgba(34, 197, 94, 0.1)' : stat.color.includes('red') ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)'}
           >
             <div className={`absolute top-0 right-0 w-24 h-24 -mr-8 -mt-8 opacity-10 rounded-full blur-2xl ${stat.bgColor}`} />
-            <div className="p-6">
-              <div className="flex items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="text-[10px] font-black text-muted-foreground uppercase tracking-widest h-4">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between gap-3 sm:gap-4">
+                <div className="space-y-1 min-w-0">
+                  <div className="text-[10px] sm:text-[11px] font-black text-muted-foreground uppercase tracking-wider sm:tracking-widest h-4 truncate">
                     <DecryptedText
                       text={stat.title}
                       animateOn="view"
@@ -129,7 +129,7 @@ export default function StatsCards({
                   </div>
                   <div className="flex items-baseline gap-2">
                     <p className={cn(
-                      "text-2xl font-black tracking-tight",
+                      "text-lg sm:text-xl md:text-2xl font-black tracking-tight break-words",
                       stat.color
                     )}>
                       {stat.value}
@@ -137,26 +137,26 @@ export default function StatsCards({
                   </div>
                 </div>
                 <div className={cn(
-                  "p-3 rounded-2xl transition-all duration-300 group-hover:scale-110",
+                  "p-2.5 sm:p-3 rounded-2xl transition-all duration-300 group-hover:scale-110 shrink-0",
                   stat.bgColor
                 )}>
                   {stat.isCustomIcon ? (
                     getCoinIcon(coinSymbol || 'btc') ? (
                       <img 
                         src={getCoinIcon(coinSymbol || 'btc') || undefined} 
-                        className={cn("h-6 w-6 rounded-full", shouldAnimate && "animate-spin")} 
+                        className={cn("h-5 w-5 sm:h-6 sm:w-6 rounded-full", shouldAnimate && "animate-spin")} 
                         alt={coinSymbol}
                         onError={(e) => (e.currentTarget.style.display = 'none')}
                       />
                     ) : (
-                      <div className="h-6 w-6 rounded-full bg-muted flex items-center justify-center text-[9px] font-bold">
+                      <div className="h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-muted flex items-center justify-center text-[8px] sm:text-[9px] font-bold">
                         {(coinSymbol || 'btc').slice(0, 2).toUpperCase()}
                       </div>
                     )
                   ) : (
                     <Icon
                       className={cn(
-                        "h-6 w-6",
+                        "h-5 w-5 sm:h-6 sm:w-6",
                         stat.color,
                         shouldAnimate && "animate-spin"
                       )}

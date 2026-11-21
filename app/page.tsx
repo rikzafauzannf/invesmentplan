@@ -309,12 +309,12 @@ export default function Home() {
           changes={changes}
         />
 
-        <SidebarInset className="flex-1 transition-all duration-300">
-          <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border/50 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
-            <div className="flex items-center gap-4">
+        <SidebarInset className="flex-1 transition-all duration-300 min-w-0">
+          <header className="flex h-16 shrink-0 items-center justify-between gap-2 sm:gap-4 border-b border-border/50 px-3 sm:px-6 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-30">
+            <div className="flex items-center gap-2 sm:gap-4 min-w-0">
               <SidebarTrigger className="-ml-1" />
-              <div className="h-4 w-[1px] bg-border/50" />
-              <h1 className="text-xl font-black tracking-tighter uppercase text-glow">
+              <div className="h-4 w-[1px] bg-border/50 hidden xs:block" />
+              <h1 className="text-sm sm:text-lg md:text-xl font-black tracking-tight sm:tracking-tighter uppercase text-glow truncate">
                 <DecryptedText
                   text={selectedCoin === 'overview' ? 'Global Portfolio' : `${selectedCoin} Terminal`}
                   animateOn="view"
@@ -324,14 +324,16 @@ export default function Home() {
               </h1>
             </div>
 
-            <div className="flex items-center gap-3 px-3 py-1.5 bg-muted/30 rounded-full border border-border/50 backdrop-blur-sm">
+            <div className="flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-1 sm:py-1.5 bg-muted/30 rounded-full border border-border/50 backdrop-blur-sm shrink-0">
               <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">System Optimal</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider sm:tracking-widest text-muted-foreground">
+                <span className="hidden xs:inline">System </span>Optimal
+              </span>
             </div>
           </header>
 
-          <main className="p-4 md:p-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+          <main className="p-3 sm:p-5 md:p-8 min-w-0">
+            <div className="max-w-7xl mx-auto space-y-6 md:space-y-8">
               <StatsCards
                 totalInvested={totalInvested}
                 totalCurrentValue={portfolioValue}

@@ -79,19 +79,19 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
 
   return (
     <Card className="border-none glass">
-      <CardHeader className="pb-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <CardHeader className="pb-3 sm:pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <CardTitle className="flex items-center gap-2 text-xl font-black tracking-tight">
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl font-black tracking-tight">
               <div className={cn(
-                "p-2 rounded-lg",
+                "p-1.5 sm:p-2 rounded-lg",
                 transactionType === 'buy' ? "bg-green-500/20" : "bg-red-500/20"
               )}>
-                {transactionType === 'buy' ? <Plus className="h-5 w-5 text-green-400" /> : <MinusCircle className="h-5 w-5 text-red-400" />}
+                {transactionType === 'buy' ? <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" /> : <MinusCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />}
               </div>
               {transactionType === 'buy' ? 'TAMBAH ASSET' : 'JUAL / WITHDRAW'}
             </CardTitle>
-            <CardDescription className="mt-1">
+            <CardDescription className="text-xs sm:text-sm mt-1">
               {transactionType === 'buy'
                 ? 'Input pembelian DCA atau penambahan stok koin Anda.'
                 : 'Catat penarikan atau penjualan koin ke Rupiah.'}
@@ -110,7 +110,7 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
           {(selectedCoin === 'overview' || !selectedCoin) && (
             <div className="space-y-2">
               <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Aset</Label>
-              <div className="grid grid-cols-5 sm:grid-cols-9 gap-1.5">
+              <div className="grid grid-cols-4 sm:grid-cols-7 md:grid-cols-9 gap-1.5">
                 {SUPPORTED_COINS.map((coin) => (
                   <Button
                     key={coin.symbol}
@@ -118,13 +118,13 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
                     variant="ghost"
                     onClick={() => setCoinSymbol(coin.symbol)}
                     className={cn(
-                      "h-12 flex flex-col items-center justify-center gap-1 transition-all border border-transparent rounded-lg",
+                      "h-10 sm:h-11 flex flex-col items-center justify-center gap-1 transition-all border border-transparent rounded-lg",
                       coinSymbol === coin.symbol
                         ? "bg-primary/10 border-primary/30 text-primary"
                         : "hover:bg-muted/50 text-muted-foreground"
                     )}
                   >
-                    <span className="text-[9px] font-black uppercase tracking-tighter">{coin.symbol}</span>
+                    <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-tighter">{coin.symbol}</span>
                   </Button>
                 ))}
               </div>
@@ -141,12 +141,12 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
                 value={formatDisplay(amount)}
                 onChange={(e) => setAmount(e.target.value.replace(/\D/g, ''))}
                 placeholder="0"
-                className="h-12 text-lg font-black bg-background/50 border-border/50"
+                className="h-11 sm:h-12 text-base sm:text-lg font-black bg-background/50 border-border/50"
               />
             </div>
             {/* Price Preview / Estimated Quantity */}
             {amount && parseFloat(amount) > 0 && prices[coinSymbol] > 0 && (
-              <div className="p-3 rounded-lg border border-primary/20 bg-primary/5 flex justify-between items-center text-xs">
+              <div className="p-2.5 sm:p-3 rounded-lg border border-primary/20 bg-primary/5 flex flex-wrap justify-between items-center gap-1 text-xs">
                 <span className="font-bold text-primary">{(parseFloat(amount) / prices[coinSymbol]).toFixed(6)} {coinSymbol.toUpperCase()}</span>
                 <span className="text-[10px] text-muted-foreground">@Rp {prices[coinSymbol].toLocaleString('id-ID')}</span>
               </div>
@@ -157,7 +157,7 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
             type="submit"
             disabled={submitting || loading}
             variant={transactionType === 'buy' ? 'default' : 'destructive'}
-            className="w-full h-11 font-black text-xs tracking-widest"
+            className="w-full h-10 sm:h-11 font-black text-xs tracking-widest"
           >
             {submitting ? '...' : (transactionType === 'buy' ? 'BELI ASET' : 'JUAL ASET')}
           </Button>
