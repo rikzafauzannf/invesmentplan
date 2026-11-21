@@ -57,7 +57,7 @@ export default function StatsCards({
 
   const stats = [
     {
-      title: isOverview ? 'Total Portfolio (Net)' : 'Investasi Bersih (Net)',
+      title: isOverview ? 'Total Portfolio (Net)' : 'Net Investment',
       value: formatCurrency(totalInvested),
       icon: DollarSign,
       color: 'text-blue-400',
@@ -65,7 +65,7 @@ export default function StatsCards({
       isCustomIcon: false,
     },
     {
-      title: isOverview ? 'Total Portfolio Value' : 'Nilai Saat Ini',
+      title: isOverview ? 'Total Portfolio Value' : 'Current Value',
       value: formatCurrency(totalCurrentValue),
       icon: DollarSign,
       color: 'text-orange-400',
@@ -85,7 +85,7 @@ export default function StatsCards({
   if (!isOverview) {
     stats.push(
       {
-        title: `Harga ${symbol} Saat Ini`,
+        title: `${symbol} Current Price`,
         value: formatCurrency(btcPrice),
         icon: isUpdating ? RefreshCw : Circle,
         color: 'text-yellow-400',
@@ -93,7 +93,7 @@ export default function StatsCards({
         isCustomIcon: true,
       },
       {
-        title: `Total ${symbol}`,
+        title: `Total ${symbol} Holdings`,
         value: `${formatQuantity(btcQuantity)} ${symbol}`,
         icon: Circle,
         color: 'text-purple-400',

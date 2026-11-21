@@ -54,7 +54,7 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
     const val = parseFloat(amount.replace(/\./g, '').replace(',', '.')) || 0;
 
     if (val <= 0) {
-      toast.error('Masukkan jumlah yang valid');
+      toast.error('Please enter a valid amount');
       return;
     }
 
@@ -64,7 +64,7 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
       setAmount('');
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('Gagal memproses transaksi.');
+      toast.error('Failed to process transaction.');
     } finally {
       setSubmitting(false);
     }
@@ -89,18 +89,18 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
               )}>
                 {transactionType === 'buy' ? <Plus className="h-4 w-4 sm:h-5 sm:w-5 text-green-400" /> : <MinusCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-400" />}
               </div>
-              {transactionType === 'buy' ? 'TAMBAH ASSET' : 'JUAL / WITHDRAW'}
+              {transactionType === 'buy' ? 'ADD ASSET' : 'SELL / WITHDRAW'}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm mt-1">
               {transactionType === 'buy'
-                ? 'Input pembelian DCA atau penambahan stok koin Anda.'
-                : 'Catat penarikan atau penjualan koin ke Rupiah.'}
+                ? 'Log your DCA purchases or asset additions.'
+                : 'Record asset liquidations or sales to IDR.'}
             </CardDescription>
           </div>
           <Tabs value={transactionType} onValueChange={(v) => setTransactionType(v as 'buy' | 'sell')} className="w-full sm:w-[140px]">
             <TabsList className="grid grid-cols-2 w-full bg-background/50 border border-border/50 h-9">
-              <TabsTrigger value="buy" className="text-[10px] data-[state=active]:bg-green-600 data-[state=active]:text-white h-7">BELI</TabsTrigger>
-              <TabsTrigger value="sell" className="text-[10px] data-[state=active]:bg-red-600 data-[state=active]:text-white h-7">JUAL</TabsTrigger>
+              <TabsTrigger value="buy" className="text-[10px] data-[state=active]:bg-green-600 data-[state=active]:text-white h-7 uppercase">BUY</TabsTrigger>
+              <TabsTrigger value="sell" className="text-[10px] data-[state=active]:bg-red-600 data-[state=active]:text-white h-7 uppercase">SELL</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -109,7 +109,7 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
         <form onSubmit={handleSubmit} className="space-y-4">
           {(selectedCoin === 'overview' || !selectedCoin) && (
             <div className="space-y-2">
-              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Aset</Label>
+              <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">Asset</Label>
               <div className="grid grid-cols-4 sm:grid-cols-7 md:grid-cols-9 gap-1.5">
                 {SUPPORTED_COINS.map((coin) => (
                   <Button
@@ -133,7 +133,7 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
 
           <div className="space-y-2">
             <Label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest pl-1">
-              Nominal (IDR)
+              Amount (IDR)
             </Label>
             <div className="relative">
               <Input
@@ -157,9 +157,9 @@ export default function InvestmentForm({ onSubmit, loading, selectedCoin, prices
             type="submit"
             disabled={submitting || loading}
             variant={transactionType === 'buy' ? 'default' : 'destructive'}
-            className="w-full h-10 sm:h-11 font-black text-xs tracking-widest"
+            className="w-full h-10 sm:h-11 font-black text-xs tracking-widest uppercase"
           >
-            {submitting ? '...' : (transactionType === 'buy' ? 'BELI ASET' : 'JUAL ASET')}
+            {submitting ? '...' : (transactionType === 'buy' ? 'BUY ASSET' : 'SELL ASSET')}
           </Button>
         </form>
       </CardContent>

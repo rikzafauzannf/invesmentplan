@@ -18,6 +18,7 @@ import { AppSidebar } from '@/components/AppSidebar';
 import DecryptedText from '@/components/reactbits/DecryptedText';
 import { getCoinIcon } from '@/lib/coin-data';
 import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface Investment {
   id?: string;
@@ -344,79 +345,92 @@ export default function Home() {
                 coinSymbol={selectedCoin}
               />
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="glass rounded-xl p-1 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  <InvestmentForm
-                    onSubmit={handleAddInvestment}
-                    loading={loading}
-                    selectedCoin={selectedCoin}
-                    prices={prices}
-                  />
-                </div>
-                <div className="glass rounded-xl p-1 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                  <AllocationChart
-                    totalInvested={totalInvested}
-                    currentValue={portfolioValue}
-                    profitLoss={profitLoss}
-                    coinSymbol={selectedCoin}
-                    portfolioData={portfolioData}
-                  />
-                </div>
-              </div>
+              <Tabs defaultValue="dashboard" className="space-y-6">
+                <TabsList className="bg-muted/30 border border-border/50 p-1 w-full sm:w-auto overflow-x-auto flex flex-nowrap">
+                  <TabsTrigger value="dashboard" className="text-[10px] font-bold tracking-widest px-6">DASHBOARD</TabsTrigger>
+                  <TabsTrigger value="market" className="text-[10px] font-bold tracking-widest px-6">MARKET & NEWS</TabsTrigger>
+                  <TabsTrigger value="tools" className="text-[10px] font-bold tracking-widest px-6">TOOLS LAB</TabsTrigger>
+                </TabsList>
 
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                <CryptoNews coinSymbol={selectedCoin} />
-              </div>
-
-              <div className="space-y-8">
-                {isOverview ? (
-                  <>
-                    <PortfolioSummary
-                      investments={investments}
-                      prices={prices}
-                      onSelectCoin={setSelectedCoin}
-                    />
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                      <DCAPlanner />
-                      <DCASplitCalculator prices={prices} supportedCoins={supportedCoins} />
+                <TabsContent value="dashboard" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="glass rounded-xl p-1">
+                      <InvestmentForm
+                        onSubmit={handleAddInvestment}
+                        loading={loading}
+                        selectedCoin={selectedCoin}
+                        prices={prices}
+                      />
                     </div>
-                    <InvestmentTable
-                      investments={filteredInvestments}
-                      currentBtcPrice={currentPrice}
-                      coinSymbol={selectedCoin}
-                      prices={prices}
-                      onDelete={handleDeleteInvestment}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                      <div className="lg:col-span-2 glass rounded-xl overflow-hidden border border-border/50">
-                        <CoinPriceChart coinSymbol={selectedCoin} />
-                      </div>
-                      <div className="lg:col-span-1">
-                        <CoinTechnicalAnalysis coinSymbol={selectedCoin} />
-                      </div>
+                    <div className="glass rounded-xl p-1">
+                      <AllocationChart
+                        totalInvested={totalInvested}
+                        currentValue={portfolioValue}
+                        profitLoss={profitLoss}
+                        coinSymbol={selectedCoin}
+                        portfolioData={portfolioData}
+                      />
                     </div>
-                    <InvestmentTable
-                      investments={filteredInvestments}
-                      currentBtcPrice={currentPrice}
-                      coinSymbol={selectedCoin}
-                      prices={prices}
-                      onDelete={handleDeleteInvestment}
-                    />
-                  </>
-                )}
+                  </div>
 
-                <div className="glass rounded-xl p-1">
-                  <ProfitTrendChart
-                    currentProfitLoss={profitLoss}
-                    currentProfitPercent={profitLossPercent}
-                    currentValue={portfolioValue}
-                    coinSymbol={selectedCoin}
-                  />
-                </div>
-              </div>
+                  <div className="space-y-8">
+                    {isOverview ? (
+                      <>
+                        <PortfolioSummary
+                          investments={investments}
+                          prices={prices}
+                          onSelectCoin={setSelectedCoin}
+                        />
+                        <InvestmentTable
+                          investments={filteredInvestments}
+                          currentBtcPrice={currentPrice}
+                          coinSymbol={selectedCoin}
+                          prices={prices}
+                          onDelete={handleDeleteInvestment}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                          <div className="lg:col-span-2 glass rounded-xl overflow-hidden border border-border/50">
+                            <CoinPriceChart coinSymbol={selectedCoin} />
+                          </div>
+                          <div className="lg:col-span-1">
+                            <CoinTechnicalAnalysis coinSymbol={selectedCoin} />
+                          </div>
+                        </div>
+                        <InvestmentTable
+                          investments={filteredInvestments}
+                          currentBtcPrice={currentPrice}
+                          coinSymbol={selectedCoin}
+                          prices={prices}
+                          onDelete={handleDeleteInvestment}
+                        />
+                      </>
+                    )}
+
+                    <div className="glass rounded-xl p-1">
+                      <ProfitTrendChart
+                        currentProfitLoss={profitLoss}
+                        currentProfitPercent={profitLossPercent}
+                        currentValue={portfolioValue}
+                        coinSymbol={selectedCoin}
+                      />
+                    </div>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="market" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <CryptoNews coinSymbol={selectedCoin} />
+                </TabsContent>
+
+                <TabsContent value="tools" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <DCAPlanner />
+                    <DCASplitCalculator prices={prices} supportedCoins={supportedCoins} />
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </main>
         </SidebarInset>
