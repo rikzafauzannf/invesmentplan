@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import dynamic from 'next/dynamic';
 import { ApexOptions } from 'apexcharts';
+import { TrendingUp } from 'lucide-react';
 
 // Dynamically import ReactApexChart to avoid SSR issues
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false });
