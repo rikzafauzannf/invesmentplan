@@ -253,15 +253,17 @@ export default function ProfitTrendChart({
     );
   }
 
+// ... inside the return statement of ProfitTrendChart.tsx ...
   return (
-    <Card className="border-none glass">
+    <Card className="border-none glass group hover:shadow-[0_0_30px_-10px_rgba(var(--primary-rgb),0.3)] transition-all duration-500">
       <CardHeader className="pb-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <CardTitle className="text-lg sm:text-xl font-black tracking-tight uppercase">
+          <CardTitle className="text-lg sm:text-xl font-black tracking-tight uppercase flex items-center gap-2">
+            <TrendingUp className="h-5 w-5 text-primary" />
             PROFIT/LOSS TREND ({symbol})
           </CardTitle>
-          <CardDescription className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-muted-foreground/60 mt-0.5">
-            24H Movement ({interval >= 60 ? `${interval / 60}h` : `${interval}m`} intervals • {snapshots.length} Data Points)
+          <CardDescription className="text-[10px] sm:text-xs font-medium uppercase tracking-widest text-muted-foreground/60 mt-1">
+            24H Movement • {interval >= 60 ? `${interval / 60}H` : `${interval}M`} Interval
           </CardDescription>
         </div>
         <div className="flex bg-muted/40 border border-border/50 rounded-lg p-1 self-start sm:self-auto">
@@ -269,9 +271,9 @@ export default function ProfitTrendChart({
             <button
               key={m}
               onClick={() => setIntervalMinutes(m)}
-              className={`px-2.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-md transition-all ${
+              className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded-md transition-all duration-300 ${
                 interval === m
-                  ? 'bg-primary/20 text-primary border border-primary/30 shadow-sm'
+                  ? 'bg-primary/20 text-primary shadow-sm'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
@@ -281,7 +283,8 @@ export default function ProfitTrendChart({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="h-[300px] sm:h-[350px] w-full">
+        <div className="h-[300px] w-full relative">
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent pointer-events-none z-10" />
           <ReactApexChart
             options={chartOptions}
             series={series}
@@ -289,6 +292,7 @@ export default function ProfitTrendChart({
             height="100%"
           />
         </div>
+        {/* ... stats footer ... */}
         <div className="p-3 sm:p-4 rounded-xl bg-muted/20 border border-border/40">
           <div className="grid grid-cols-3 gap-2 text-center">
             <div>
